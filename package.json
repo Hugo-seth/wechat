@@ -1,0 +1,28 @@
+{
+  "name": "weixin",
+  "version": "1.0.0",
+  "description": "wechat by node",
+  "main": "app.js",
+  "dependencies": {
+    "koa": "^1.2.1",
+    "sha1": "^1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hugo-seth/wechat.git"
+  },
+  "keywords": [
+    "wechat",
+    "node"
+  ],
+  "author": "hugo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hugo-seth/wechat/issues"
+  },
+  "homepage": "https://github.com/Hugo-seth/wechat#readme"
+}
