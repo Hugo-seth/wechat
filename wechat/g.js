@@ -23,16 +23,16 @@ function Wechat(opts) {
     .then(function(data) {
       //console.log(data)
       try {
-        JSON.parse(data)
+        data = JSON.parse(data)
       } catch (e) {
         return that.updateAccessToken()
       }
 
       if (that.isValidAccessToken(data)) {
         console.log('valid')
-        Promise.resolve(data)
+        return Promise.resolve(data)
       } else {
-        console.log('invalid')  
+        console.log('invalid')
         return that.updateAccessToken()
       }
     })
@@ -54,7 +54,7 @@ Wechat.prototype.isValidAccessToken = function(data) {
   var access_token = data.access_token
   var expires_in = data.expires_in
   var now = new Date().getTime()
-  console.log(now+ ' ' + expires_in)
+  console.log(now + ' ' + expires_in)
 
   if (now < expires_in) {
     return true
@@ -84,16 +84,22 @@ Wechat.prototype.updateAccessToken = function() {
   })
 }
 
-/*Wechat.prototype.response = function() {
+Wechat.prototype.response = function() {
   var content = this.body
   var message = this.weixin
-}*/
+
+  var xml = parseXML.tpl(content, message)
+
+  that.status = 200
+  that.type = 'application/xml'
+  that.body = xml
+}
 
 module.exports = function(opts) {
 
-  var wechat = new Wechat(opts)
+  //var wechat = new Wechat(opts)
 
-  return function* (next) {
+  return function*(next) {
     //console.log(this.query)
     var that = this
 
@@ -134,7 +140,7 @@ module.exports = function(opts) {
 
       console.log(message)
 
-      if (message.MsgType === 'event') {
+      /*if (message.MsgType === 'event') {
         if (message.Event === 'subscribe') {
           var now = new Date().getTime()
 
@@ -142,7 +148,7 @@ module.exports = function(opts) {
           that.type = 'application/xml'
           that.body = '<xml><ToUserName><![CDATA[' + message.FromUserName + ']]></ToUserName><FromUserName><![CDATA[' + message.ToUserName + ']]></FromUserName><CreateTime>'+ now +'</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[来了，请坐]]></Content></xml>'
         }
-      }
+      }*/
 
       //this.weixin = message
 
