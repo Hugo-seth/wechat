@@ -2,7 +2,7 @@
 
 var Koa = require('koa')
 var wechat = require('./wechat/g')
-var config = require('./config')
+var config = require('./config/config')
 
 var app = new Koa()
 

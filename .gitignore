@@ -8,4 +8,4 @@ plugins/
 *.swp
 .DS_Store
 Thumbs.db
-config.js
+config/
