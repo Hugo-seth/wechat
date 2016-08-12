@@ -43,14 +43,18 @@ function formatMessage(data) {
 
 exports.formatMessage = formatMessage
 
-exports.tpl = function(content, message) {
+exports.handlerXML = function(response, request) {
+  //console.log(response)
+
   var info = {
-    fromUserName: message.ToUserName,
-    toUserName: message.FromUserName,
-    responseType: message.responseType,
-    content: content
+    fromUserName: request.ToUserName,
+    toUserName: request.FromUserName,
+    responseType: response.responseType,
+    content: response.content
   }
   info.createTime = new Date().getTime()
+
+  //console.log(info)
 
   return tpl.compiled(info)
 
