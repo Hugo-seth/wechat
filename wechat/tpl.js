@@ -11,6 +11,10 @@ var tpl = heredoc(function() {/*
   <MsgType><![CDATA[<%= responseType %>]]></MsgType>
   <% if (responseType === 'text') { %>
     <Content><![CDATA[<%= content %>]]></Content>
+  <% } else if (responseType === 'image') { %>
+    <Image>
+      <MediaId><![CDATA[<%= content %>]]></MediaId>
+    </Image>
   <% } else if (responseType === 'news') { %>
   <ArticleCount><% content.length %></ArticleCount>
   <Articles>

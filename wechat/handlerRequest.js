@@ -2,6 +2,7 @@
 
 var config = require('../config/config')
 var Wechat = require('./wechat')
+var wechatAPI = new Wechat(config.wechat)
 
 exports.handlerRequest = function* (next) {
 
@@ -20,8 +21,10 @@ exports.handlerRequest = function* (next) {
     this.myResponse.content = '哈哈： ' + request.Content
   } else {
     
+    this.myResponse.responseType = 'image'
 
-    this.myResponse.content = 'sorry,不知道你在说什么'
+    var media = yield wechatAPI.uploadMedia('image', 'images/1.png')
+    this.myResponse.content = media.media_id
   }
 
   yield next
