@@ -25,6 +25,7 @@ module.exports = function(opts, handlerRequest) {
     if (this.method === 'GET') {
       if (sha === signature) {
         this.body = echostr + ''
+        console.log('right request')
       } else {
         this.body = 'wrong'
       }

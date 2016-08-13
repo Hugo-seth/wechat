@@ -27,6 +27,12 @@ var tpl = heredoc(function() {/*
       </item>
     <% }) %>
   </Articles>
+  <% } else if (responseType === 'video') { %>
+  <Video>
+    <MediaId><![CDATA[<%= content.media_id %>]]></MediaId>
+    <Title><![CDATA[<%= content.title %>]]></Title>
+    <Description><![CDATA[<%= content.description %>]]></Description>
+  </Video>
   <% } %>
   </xml>
 */})

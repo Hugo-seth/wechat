@@ -19,30 +19,6 @@ function Wechat(opts) {
   this.getAccessToken = opts.getAccessToken
   this.saveAccessToken = opts.saveAccessToken
 
-  this.getAccessToken()
-    .then(function(data) {
-      //console.log(data)
-      try {
-        data = JSON.parse(data)
-      } catch (e) {
-        return that.updateAccessToken()
-      }
-
-      if (that.isValidAccessToken(data)) {
-        console.log('valid')
-        return Promise.resolve(data)
-      } else {
-        console.log('invalid')
-        return that.updateAccessToken()
-      }
-    })
-    .then(function(data) {
-      console.log(data)
-      that.access_token = data.access_token
-      that.expires_in = data.expires_in
-
-      that.saveAccessToken(data)
-    })
 }
 
 Wechat.prototype.isValidAccessToken = function(data) {
@@ -53,7 +29,7 @@ Wechat.prototype.isValidAccessToken = function(data) {
   var access_token = data.access_token
   var expires_in = data.expires_in
   var now = new Date().getTime()
-  //console.log(now + ' ' + expires_in)
+    //console.log(now + ' ' + expires_in)
 
   if (now < expires_in) {
     return true
@@ -63,6 +39,8 @@ Wechat.prototype.isValidAccessToken = function(data) {
 }
 
 Wechat.prototype.updateAccessToken = function() {
+  var that = this
+  
   var appID = this.appID
   var appSecret = this.appSecret
   var url = API.accessToken + '&appid=' + appID + '&secret=' + appSecret
@@ -77,35 +55,52 @@ Wechat.prototype.updateAccessToken = function() {
         var expires_in = now + (data.expires_in - 20) * 1000
 
         data.expires_in = expires_in
-        //console.log(data)
+        console.log(data)
+        that.access_token = data.access_token
+        that.expires_in = data.expires_in
+
+        that.saveAccessToken(data)
+        console.log('updata')
         resolve(data)
       })
   })
 }
 
-Wechat.prototype.fetchAccessToken = function () {
+Wechat.prototype.fetchAccessToken = function() {
   var that = this
 
-  var data = {
-    access_token: that.access_token,
-    expires_in: that.expires_in
-  }
-  //console.log(data)
-  if (this.isValidAccessToken(data)) {
-    return Promise.resolve(data)
+  if (this.access_token && this.expires_in) {
+    var data = {
+      access_token: this.access_token,
+      expires_in: this.expires_in
+    }
+    if (this.isValidAccessToken(data)) {
+      return Promise.resolve(data)
+    } else {
+      return this.updateAccessToken()
+
+    }
   } else {
-    this.updateAccessToken()
+
+    this.getAccessToken()
       .then(function(data) {
-        //console.log(data)
-        that.access_token = data.access_token
-        that.expires_in = data.expires_in
+        console.log('get')
+        try {
+          data = JSON.parse(data)
+        } catch (e) {
+          return that.updateAccessToken()
+        }
 
-        that.saveAccessToken(data)
-
-        return Promise.resolve(data)
+        if (that.isValidAccessToken(data)) {
+          console.log('valid')
+          return Promise.resolve(data)
+        } else {
+          console.log('invalid')
+          return that.updateAccessToken()
+        }
       })
   }
-  
+
 }
 
 Wechat.prototype.response = function() {
@@ -128,19 +123,23 @@ Wechat.prototype.uploadMedia = function(type, path) {
   }
   var appID = this.appID
   var appSecret = this.appSecret
-  
+
   return new Promise(function(resolve, reject) {
     that
       .fetchAccessToken()
       .then(function(data) {
         var url = API.uploadMedia + 'access_token=' + data.access_token + '&type=' + type
 
-        request({method: 'POST', url: url, formData: form, json: true })
+        request({ method: 'POST', url: url, formData: form, json: true })
           .then(function(response) {
             var media = response.body
             console.log(media)
-
-            resolve(media)
+            if (media) {
+              resolve(media)
+            } else {
+              throw new Error('upload temp media fails')
+            }
+            
           })
       })
 

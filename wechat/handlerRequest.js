@@ -4,7 +4,9 @@ var config = require('../config/config')
 var Wechat = require('./wechat')
 var wechatAPI = new Wechat(config.wechat)
 
-exports.handlerRequest = function* (next) {
+//wechatAPI.updateAccessToken()
+
+exports.handlerRequest = function*(next) {
 
   var wechat
 
@@ -19,12 +21,27 @@ exports.handlerRequest = function* (next) {
     }
   } else if (request.MsgType === 'text') {
     this.myResponse.content = '哈哈： ' + request.Content
-  } else {
-    
-    this.myResponse.responseType = 'image'
 
-    var media = yield wechatAPI.uploadMedia('image', 'images/1.png')
-    this.myResponse.content = media.media_id
+    if (request.Content === '1') {
+      this.myResponse.responseType = 'image'
+
+      var media = yield wechatAPI.uploadMedia('image', 'images/config.png')
+      this.myResponse.content = media.media_id
+
+    } else if (request.Content === '2') {
+      this.myResponse.responseType = 'video'
+
+      this.response.content = {
+        title: '回复视频',
+        description: '看我回复的是什么'
+      }
+      var media = yield wechatAPI.uploadMedia('image', 'images/2.mp4')
+      this.myResponse.content.media_id = media.media_id
+    }
+
+  } else {
+
+    this.myResponse.content = 'sorry, 不知道你在说什么'
   }
 
   yield next
