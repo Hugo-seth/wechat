@@ -10,18 +10,18 @@ var tpl = heredoc(function() {/*
   <CreateTime><%= createTime %></CreateTime>
   <MsgType><![CDATA[<%= responseType %>]]></MsgType>
   <% if (responseType === 'text') { %>
-    <Content><![CDATA[<%= content %>]]></Content>
+    <Content><![CDATA[<%= content.text %>]]></Content>
   <% } else if (responseType === 'image') { %>
     <Image>
-      <MediaId><![CDATA[<%= content %>]]></MediaId>
+      <MediaId><![CDATA[<%= content.img %>]]></MediaId>
     </Image>
   <% } else if (responseType === 'news') { %>
-  <ArticleCount><% content.length %></ArticleCount>
+  <ArticleCount><%= content.news.length %></ArticleCount>
   <Articles>
-    <% content.forEach(function(item) { %>
+    <% content.news.forEach(function(item) { %>
       <item>
         <Title><![CDATA[<%= item.title %>]]></Title> 
-        <Description><![CDATA[<%= item.description1 %>]]></Description>
+        <Description><![CDATA[<%= item.description %>]]></Description>
         <PicUrl><![CDATA[<%= item.picurl %>]]></PicUrl>
         <Url><![CDATA[<%= item.url %>]]></Url>
       </item>
@@ -29,10 +29,17 @@ var tpl = heredoc(function() {/*
   </Articles>
   <% } else if (responseType === 'video') { %>
   <Video>
-    <MediaId><![CDATA[<%= content.media_id %>]]></MediaId>
+    <MediaId><![CDATA[<%= content.video %>]]></MediaId>
     <Title><![CDATA[<%= content.title %>]]></Title>
     <Description><![CDATA[<%= content.description %>]]></Description>
   </Video>
+  <% } else if (responseType === 'music') { %>
+  <Music>
+    <Title><![CDATA[<%= content.title %>]]></Title>
+    <Description><![CDATA[<%= content.description %>]]></Description>
+    <MusicUrl><![CDATA[<%= content.music %>]]></MusicUrl>
+    <ThumbMediaId><![CDATA[<%= content.img %>]]></ThumbMediaId>
+  </Music>
   <% } %>
   </xml>
 */})
