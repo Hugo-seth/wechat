@@ -34,6 +34,9 @@ var API = {
   user: {
     getUserInfo: baseUrl + '/user/info?lang=zh_CN',
     batchGet: baseUrl + '/user/info/batchget?'
+  },
+  message: {
+    sendAll: baseUrl + '/message/mass/sendall?'
   }
 }
 
@@ -415,6 +418,49 @@ Wechat.prototype.getUserInfo = function(openIds) {
               resolve(userInfo)
             } else {
               throw new Error('getUserInfo fails')
+            }
+          })
+          .catch(function(err) {
+            reject(err)
+          })
+      })
+
+  })
+
+}
+
+Wechat.prototype.sendMessage = function(message, type, groupId) {
+  var that = this
+
+  var form = {
+    msgtype: type
+  }
+  form[type] = message
+  if (groupId) {
+    form.filter = {
+      is_to_all: false,
+      group_id: groupId
+    }
+  } else {
+    form.filter = {
+      is_to_all: true
+    }
+  }
+  console.log(form)
+
+  return new Promise(function(resolve, reject) {
+    that.fetchAccessToken()
+      .then(function(data) {
+        var url = API.message.sendAll + 'access_token=' + data.access_token
+
+        request({method: 'POST', url: url, body: form, json: true })
+          .then(function(response) {
+            var result = response.body
+            console.log(result)
+            if (result) {
+              resolve(result)
+            } else {
+              throw new Error('sendMessage fails')
             }
           })
           .catch(function(err) {

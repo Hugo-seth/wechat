@@ -23,6 +23,10 @@ exports.handlerRequest = function*(next) {
       this.myResponse.content = {
         text: '经度: ' + request.Longitude + ' 纬度: ' + request.Latitude
       }
+    } else {
+      this.myResponse.content = {
+        text: ''
+      }
     }
   } else if (request.MsgType === 'text') {
     this.myResponse.content = {
@@ -185,6 +189,26 @@ exports.handlerRequest = function*(next) {
       //console.log(userInfo)
 
       this.myResponse.content.text = 'nickname: ' + userInfo.nickname
+
+    } else if (request.Content === '30') {
+      this.myResponse.responseType = 'text'
+
+      var message = {
+        media_id: 'BxY9DCQShdYAJf_qI21tavnpwCeA9hvRXFANx4Blry8'
+      }
+      var result = yield wechatAPI.sendMessage(message, 'mpnews')
+
+      this.myResponse.content.text = '群发消息'
+
+    } else if (request.Content === '31') {
+      this.myResponse.responseType = 'text'
+
+      var message = {
+        content: 'hello imooc'
+      }
+      var result = yield wechatAPI.sendMessage(message, 'text')
+
+      this.myResponse.content.text = '群发消息'
 
     }
   } else {
