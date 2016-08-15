@@ -51,6 +51,8 @@ module.exports = function(opts, handlerRequest) {
 
       console.log(message)
 
+      this.body = ''
+
       /*if (message.MsgType === 'text') {
 
         var now = new Date().getTime()

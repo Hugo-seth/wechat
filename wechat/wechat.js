@@ -9,17 +9,31 @@ var _ = require('lodash')
 var baseUrl = 'https://api.weixin.qq.com/cgi-bin'
 
 var API = {
-  accessToken: '/token?grant_type=client_credential',
+  accessToken: baseUrl + '/token?grant_type=client_credential',
   temp: {
-    uploadMedia: '/media/upload?',
-    getMedia: '/media/get?'
+    uploadMedia: baseUrl + '/media/upload?',
+    getMedia: baseUrl + '/media/get?'
   },
   permanent: {
-    addNews: '/material/add_news?',
-    addNewsImg: '/media/uploadimg?',
-    addMaterial: '/material/add_material?',
-    getMaterial: '/material/get_material?',
-    count: '/material/get_materialcount?'
+    addNews: baseUrl + '/material/add_news?',
+    addNewsImg: baseUrl + '/media/uploadimg?',
+    addMaterial: baseUrl + '/material/add_material?',
+    getMaterial: baseUrl + '/material/get_material?',
+    count: baseUrl + '/material/get_materialcount?',
+    getMaterialList: baseUrl + '/material/batchget_material?'
+  },
+  group: {
+    create: baseUrl + '/groups/create?',
+    get: baseUrl + '/groups/get?',
+    getUserGroup: baseUrl + '/cgi-bin/groups/getid?',
+    updateGroup: baseUrl + '/cgi-bin/groups/update?',
+    removeUser: baseUrl + '/cgi-bin/groups/members/update?',
+    batchRemove: baseUrl + '/groups/members/batchupdate?',
+    del: baseUrl + '/groups/delete?'
+  },
+  user: {
+    getUserInfo: baseUrl + '/user/info?lang=zh_CN',
+    batchGet: baseUrl + '/user/info/batchget?'
   }
 }
 
@@ -54,7 +68,7 @@ Wechat.prototype.updateAccessToken = function() {
 
   var appID = this.appID
   var appSecret = this.appSecret
-  var url = baseUrl + API.accessToken + '&appid=' + appID + '&secret=' + appSecret
+  var url = API.accessToken + '&appid=' + appID + '&secret=' + appSecret
 
   return new Promise(function(resolve, reject) {
     request({ url: url, json: true })
@@ -89,7 +103,6 @@ Wechat.prototype.fetchAccessToken = function() {
 
   return this.getAccessToken()
     .then(function(data) {
-      console.log('get')
       try {
         data = JSON.parse(data)
       } catch (e) {
@@ -138,16 +151,16 @@ Wechat.prototype.uploadMaterial = function(type, material, permanent) {
     _.extend(form, permanent)
 
     if (type === 'newsImg') {
-      _url = baseUrl + API.permanent.addNewsImg
+      _url = API.permanent.addNewsImg
     } else if (type === 'news') {
-      _url = baseUrl + API.permanent.addNews
+      _url = API.permanent.addNews
       form = material
     } else {
-      _url = baseUrl + API.permanent.addMaterial
+      _url = API.permanent.addMaterial
       form.media = fs.createReadStream(material)
     }
   } else {
-    var _url = baseUrl + API.temp.uploadMedia
+    var _url = API.temp.uploadMedia
     form.media = fs.createReadStream(material)
   }
 
@@ -162,6 +175,9 @@ Wechat.prototype.uploadMaterial = function(type, material, permanent) {
           url += '&type=' + type
         } else {
           form.access_token = data.access_token
+          if (type === 'video') {
+            form.description = JSON.stringify(form.description)
+          }
         }
         console.log(url)
 
@@ -186,7 +202,9 @@ Wechat.prototype.uploadMaterial = function(type, material, permanent) {
             } else {
               throw new Error('upload material fails')
             }
-
+          })
+          .catch(function(err) {
+            reject(err)
           })
       })
 
@@ -200,9 +218,9 @@ Wechat.prototype.getMaterial = function(mediaId, type, permanent) {
   var _url
 
   if (permanent) {
-    _url = baseUrl + API.permanent.getMaterial
+    _url = API.permanent.getMaterial
   } else {
-    var _url = baseUrl + API.temp.getMedia
+    var _url = API.temp.getMedia
   }
   //console.log(form)
 
@@ -229,14 +247,16 @@ Wechat.prototype.getMaterial = function(mediaId, type, permanent) {
         if (type === 'news' || type === 'video') {
           request(options)
             .then(function(response) {
-              var media = response.body
-              console.log(media)
-              if (media) {
-                resolve(media)
+              var material = response.body
+              console.log(material)
+              if (material) {
+                resolve(material)
               } else {
                 throw new Error('getMaterial fails')
               }
-
+            })
+            .catch(function(err) {
+              reject(err)
             })
         } else {
           resolve(url)
@@ -252,7 +272,7 @@ Wechat.prototype.count = function() {
   return new Promise(function(resolve, reject) {
     that.fetchAccessToken()
       .then(function(data) {
-        var url = baseUrl + API.permanent.count + 'access_token=' + data.access_token
+        var url = API.permanent.count + 'access_token=' + data.access_token
         console.log(url)
 
         request({ method: 'GET', url: url, json: true })
@@ -264,7 +284,141 @@ Wechat.prototype.count = function() {
             } else {
               throw new Error('countMaterial fails')
             }
+          })
+          .catch(function(err) {
+            reject(err)
+          })
+      })
 
+  })
+
+}
+
+Wechat.prototype.getMaterialList = function(options) {
+  var that = this
+
+  return new Promise(function(resolve, reject) {
+    that.fetchAccessToken()
+      .then(function(data) {
+        var url = API.permanent.getMaterialList + 'access_token=' + data.access_token
+        console.log(url)
+
+        request({ method: 'POST', url: url, body: options, json: true })
+          .then(function(response) {
+            var materialList = response.body
+            console.log(materialList)
+            if (materialList) {
+              resolve(materialList)
+            } else {
+              throw new Error('getMaterialList fails')
+            }
+          })
+          .catch(function(err) {
+            reject(err)
+          })
+      })
+
+  })
+
+}
+
+Wechat.prototype.createGroup = function(name) {
+  var that = this
+
+  return new Promise(function(resolve, reject) {
+    that.fetchAccessToken()
+      .then(function(data) {
+        var url = API.group.create + 'access_token=' + data.access_token
+        console.log(url)
+
+        var options = {
+          group: {
+            name: name
+          }
+        }
+
+        request({ method: 'POST', url: url, body: options, json: true })
+          .then(function(response) {
+            var group = response.body
+            console.log(group)
+            if (group) {
+              resolve(group)
+            } else {
+              throw new Error('createGroup fails')
+            }
+          })
+          .catch(function(err) {
+            reject(err)
+          })
+      })
+
+  })
+
+}
+
+Wechat.prototype.getGroup = function() {
+  var that = this
+
+  return new Promise(function(resolve, reject) {
+    that.fetchAccessToken()
+      .then(function(data) {
+        var url = API.group.get + 'access_token=' + data.access_token
+        console.log(url)
+
+        request({ url: url, json: true })
+          .then(function(response) {
+            var groups = response.body
+            console.log(groups)
+            if (groups) {
+              resolve(groups)
+            } else {
+              throw new Error('getGroups fails')
+            }
+          })
+          .catch(function(err) {
+            reject(err)
+          })
+      })
+
+  })
+
+}
+
+Wechat.prototype.getUserInfo = function(openIds) {
+  var that = this
+
+  return new Promise(function(resolve, reject) {
+    that.fetchAccessToken()
+      .then(function(data) {
+
+        var url
+        var options = {
+          json: true
+        }
+        if (_.isArray(openIds)) {
+          url = API.user.batchGet + '&access_token=' + data.access_token
+          options.method = 'POST'
+          options.body = {
+            user_list: openIds
+          }
+        } else {
+          url = API.user.getUserInfo + '&access_token=' + data.access_token + '&openid=' + openIds
+        }
+        console.log(url)
+        options.url = url
+
+        request({ url: url, json: true })
+          .then(function(response) {
+            var userInfo = response.body
+            console.log(userInfo)
+            if (userInfo) {
+              resolve(userInfo)
+            } else {
+              throw new Error('getUserInfo fails')
+            }
+          })
+          .catch(function(err) {
+            reject(err)
           })
       })
 
