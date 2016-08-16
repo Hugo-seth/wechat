@@ -1,8 +1,16 @@
 'use strict'
 
 var config = require('../config/config')
+var menu = require('./menu.js')
 var Wechat = require('./wechat')
 var wechatAPI = new Wechat(config.wechat)
+
+/*wechatAPI.deleteMenu().then(function() {
+  return wechatAPI.createMenu(menu)
+})
+.then(function(data) {
+  console.log(data)
+})*/
 
 exports.handlerRequest = function*(next) {
   var that = this
@@ -23,9 +31,41 @@ exports.handlerRequest = function*(next) {
       this.myResponse.content = {
         text: '经度: ' + request.Longitude + ' 纬度: ' + request.Latitude
       }
+    } else if (request.Event === 'CLICK') {
+      this.myResponse.content = {
+        text: request.Event + request.EventKey
+      }
+    } else if (request.Event === 'VIEW') {
+      this.myResponse.content = {
+        text: request.Event + request.EventKey
+      }
+    } else if (request.Event === 'scancode_push') {
+      this.myResponse.content = {
+        text: request.Event + request.ScanResult
+      }
+    } else if (request.Event === 'scancode_waitmsg') {
+      this.myResponse.content = {
+        text: request.Event + request.ScanResult
+      }
+    } else if (request.Event === 'pic_sysphoto') {
+      this.myResponse.content = {
+        text: request.Event + request.SendPicsInfo
+      }
+    } else if (request.Event === 'pic_photo_or_album') {
+      this.myResponse.content = {
+        text: request.Event + request.SendPicsInfo
+      }
+    } else if (request.Event === 'pic_weixin') {
+      this.myResponse.content = {
+        text: request.Event + request.SendPicsInfo
+      }
+    } else if (request.Event === 'location_select') {
+      this.myResponse.content = {
+        text: request.Event + request.SendLocationInfo + request.Label
+      }
     } else {
       this.myResponse.content = {
-        text: ''
+        text: request.Event
       }
     }
   } else if (request.MsgType === 'text') {
@@ -53,6 +93,24 @@ exports.handlerRequest = function*(next) {
       this.myResponse.content.video = media.media_id
 
     } else if (request.Content === '3') {
+      this.myResponse.responseType = 'text'
+
+      //var media = yield wechatAPI.uploadMaterial('thumb', 'images/mayday.jpg', {})
+      //console.log(media)
+      //'BxY9DCQShdYAJf_qI21taml4192YigMVHzDLt_gKknE'
+      //url: 'http://mmbiz.qpic.cn/mmbiz_jpg/WQaZgV48yX153qfK7e5IHibDte7iamIvhyL1TAHl0bZt0Ob1TycahyR37UPknUIqo4LNohDyvCl5ddFX4q70jcvQ/0?wx_fmt=jpeg'
+      this.myResponse.content.text = 'BxY9DCQShdYAJf_qI21taml4192YigMVHzDLt_gKknE'
+
+    } else if (request.Content === '4') {
+      this.myResponse.responseType = 'music'
+
+      this.myResponse.content.title = '段子薛'
+      this.myResponse.content.description = '其实我是一个演员'
+      //http://c.y.qq.com/v8/playsong.html?songid=102636799&source=yqq#wechat_redirect
+      this.myResponse.content.music = 'http://c.y.qq.com/v8/playsong.html?songid=102636799'
+      this.myResponse.content.img = 'BxY9DCQShdYAJf_qI21taml4192YigMVHzDLt_gKknE'
+
+    } else if (request.Content === '5') {
       this.myResponse.responseType = 'image'
 
       //var media = yield wechatAPI.uploadMaterial('image', 'images/mayday.jpg', { type: 'image' })
@@ -62,25 +120,28 @@ exports.handlerRequest = function*(next) {
       //this.myResponse.content.img = media.media_id
       this.myResponse.content.img = 'BxY9DCQShdYAJf_qI21taqfFb5ZBH-UVaSG6Yh9AoTk'
 
-    } else if (request.Content === '4') {
+    } else if (request.Content === '6') {
       this.myResponse.responseType = 'video'
 
-      var media = yield wechatAPI.uploadMaterial('video', 'images/mayday.mp4', {
+      /*var media = yield wechatAPI.uploadMaterial('video', 'images/mayday.mp4', {
         type: 'video',
         description: {
           title: 'mayday',
           introduction: 'watch mayday'
         }
-      })
+      })*/
       //console.log(media)
-      this.myResponse.content.video = media.media_id
+      //'BxY9DCQShdYAJf_qI21tas4Q0kHU5UdBt3NqE-YpaTE'
+      //down_url: 'http://202.77.59.45/vweixinp.tc.qq.com/1007_d132f4ab8c8247be938a9b0307628cf3.f10.mp4?vkey=7CBBCDF5BCA5A25B0460D7A2D942EE6963B6C46E742175B07828DEADF037762AF48AD5D81AF819DC&sha=0&save=1'
+      this.myResponse.content.video = 'BxY9DCQShdYAJf_qI21tas4Q0kHU5UdBt3NqE-YpaTE'
         //media_id: 
         //url: 
-      var getVideo = yield wechatAPI.getMaterial('', 'video', {})
+      var getVideo = yield wechatAPI.getMaterial('BxY9DCQShdYAJf_qI21tas4Q0kHU5UdBt3NqE-YpaTE', 'video', {})
+      console.log(getVideo)
       this.myResponse.content.title = getVideo.title
       this.myResponse.content.description = getVideo.description
 
-    } else if (request.Content === '5') {
+    } else if (request.Content === '7') {
       this.myResponse.responseType = 'news'
 
       //var media = yield wechatAPI.uploadMaterial('image', 'images/mayday.jpg', { type: 'image' })
@@ -119,7 +180,7 @@ exports.handlerRequest = function*(next) {
       })
 
 
-    } else if (request.Content === '6') {
+    } else if (request.Content === '8') {
       this.myResponse.responseType = 'text'
 
       var counts = yield wechatAPI.count()
@@ -127,7 +188,7 @@ exports.handlerRequest = function*(next) {
 
       this.myResponse.content.text = 'voice: ' + counts.voice_count + ' video: ' + counts.video_count + ' img: ' + counts.image_count + ' news: ' + counts.news_count
 
-    } else if (request.Content === '7') {
+    } else if (request.Content === '9') {
       this.myResponse.responseType = 'text'
 
       /*var counts = yield wechatAPI.getMaterialList({

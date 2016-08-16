@@ -37,6 +37,11 @@ var API = {
   },
   message: {
     sendAll: baseUrl + '/message/mass/sendall?'
+  },
+  menu: {
+    create: baseUrl + '/menu/create?',
+    get: baseUrl + '/menu/get?',
+    del: baseUrl + '/menu/delete?'
   }
 }
 
@@ -461,6 +466,90 @@ Wechat.prototype.sendMessage = function(message, type, groupId) {
               resolve(result)
             } else {
               throw new Error('sendMessage fails')
+            }
+          })
+          .catch(function(err) {
+            reject(err)
+          })
+      })
+
+  })
+
+}
+
+Wechat.prototype.createMenu = function(menu) {
+  var that = this
+
+  return new Promise(function(resolve, reject) {
+    that.fetchAccessToken()
+      .then(function(data) {
+        var url = API.menu.create + 'access_token=' + data.access_token
+        console.log(url)
+
+        request({ method: 'POST', url: url, body: menu, json: true })
+          .then(function(response) {
+            var menu = response.body
+            console.log(menu)
+            if (menu) {
+              resolve(menu)
+            } else {
+              throw new Error('createMenu fails')
+            }
+          })
+          .catch(function(err) {
+            reject(err)
+          })
+      })
+
+  })
+
+}
+
+Wechat.prototype.getMenu = function() {
+  var that = this
+
+  return new Promise(function(resolve, reject) {
+    that.fetchAccessToken()
+      .then(function(data) {
+        var url = API.menu.get + 'access_token=' + data.access_token
+        console.log(url)
+
+        request({url: url, json: true })
+          .then(function(response) {
+            var menu = response.body
+            console.log(menu)
+            if (menu) {
+              resolve(menu)
+            } else {
+              throw new Error('getMenu fails')
+            }
+          })
+          .catch(function(err) {
+            reject(err)
+          })
+      })
+
+  })
+
+}
+
+Wechat.prototype.deleteMenu = function() {
+  var that = this
+
+  return new Promise(function(resolve, reject) {
+    that.fetchAccessToken()
+      .then(function(data) {
+        var url = API.menu.del + 'access_token=' + data.access_token
+        console.log(url)
+
+        request({url: url, json: true })
+          .then(function(response) {
+            var result = response.body
+            console.log(result)
+            if (result) {
+              resolve(result)
+            } else {
+              throw new Error('deleteMenu fails')
             }
           })
           .catch(function(err) {
