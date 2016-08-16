@@ -123,20 +123,21 @@ exports.handlerRequest = function*(next) {
     } else if (request.Content === '6') {
       this.myResponse.responseType = 'video'
 
-      /*var media = yield wechatAPI.uploadMaterial('video', 'images/mayday.mp4', {
+      /*var video = yield wechatAPI.uploadMaterial('video', 'images/mayday.mp4', {
         type: 'video',
         description: {
-          title: 'mayday',
-          introduction: 'watch mayday'
+          title: '温柔',
+          introduction: '如果有，就给你自由'
         }
       })*/
-      //console.log(media)
       //'BxY9DCQShdYAJf_qI21tas4Q0kHU5UdBt3NqE-YpaTE'
       //down_url: 'http://202.77.59.45/vweixinp.tc.qq.com/1007_d132f4ab8c8247be938a9b0307628cf3.f10.mp4?vkey=7CBBCDF5BCA5A25B0460D7A2D942EE6963B6C46E742175B07828DEADF037762AF48AD5D81AF819DC&sha=0&save=1'
-      this.myResponse.content.video = 'BxY9DCQShdYAJf_qI21tas4Q0kHU5UdBt3NqE-YpaTE'
-        //media_id: 
-        //url: 
-      var getVideo = yield wechatAPI.getMaterial('BxY9DCQShdYAJf_qI21tas4Q0kHU5UdBt3NqE-YpaTE', 'video', {})
+      //'BxY9DCQShdYAJf_qI21talnUIH-X7wllNrRMWpyn-Kc'
+      
+      //this.myResponse.content.video = video.media_id
+      this.myResponse.content.video = 'BxY9DCQShdYAJf_qI21talnUIH-X7wllNrRMWpyn-Kc'
+
+      var getVideo = yield wechatAPI.getMaterial('BxY9DCQShdYAJf_qI21talnUIH-X7wllNrRMWpyn-Kc', 'video', {})
       console.log(getVideo)
       this.myResponse.content.title = getVideo.title
       this.myResponse.content.description = getVideo.description
