@@ -42,6 +42,9 @@ var API = {
     create: baseUrl + '/menu/create?',
     get: baseUrl + '/menu/get?',
     del: baseUrl + '/menu/delete?'
+  },
+  SDKTicket: {
+    get: baseUrl + '/ticket/getticket?type=jsapi'
   }
 }
 
@@ -54,21 +57,33 @@ function Wechat(opts) {
 
 }
 
-Wechat.prototype.isValidAccessToken = function(data) {
-  if (!data || !data.access_token || !data.expires_in) {
-    return false
-  }
+Wechat.prototype.isValid = function(data, type) {
+  if (type === 'access_token') {
+    if (!data || !data.access_token || !data.expires_in) {
+      return false
+    }
 
-  var access_token = data.access_token
-  var expires_in = data.expires_in
-  var now = new Date().getTime()
-  console.log(now + ' ' + expires_in)
+    var now = new Date().getTime()
 
-  if (now < expires_in) {
-    return true
+    if (now < expires_in) {
+      return true
+    } else {
+      return false
+    }
   } else {
-    return false
+    if (!data || !data.SDKTicket || !data.SDKTicket_expires_in) {
+      return false
+    }
+
+    var now = new Date().getTime()
+
+    if (now < SDKTicket_expires_in) {
+      return true
+    } else {
+      return false
+    }
   }
+
 }
 
 Wechat.prototype.updateAccessToken = function() {
@@ -76,7 +91,7 @@ Wechat.prototype.updateAccessToken = function() {
 
   var appID = this.appID
   var appSecret = this.appSecret
-  var url = API.accessToken + '&appid=' + appID + '&secret=' + appSecret
+  var url = API.SDKTicket.get + '&access_token=' + access_token
 
   return new Promise(function(resolve, reject) {
     request({ url: url, json: true })
@@ -103,7 +118,7 @@ Wechat.prototype.fetchAccessToken = function() {
       access_token: this.access_token,
       expires_in: this.expires_in
     }
-    if (this.isValidAccessToken(data)) {
+    if (this.isValid(data, 'access_token')) {
       return Promise.resolve(data)
 
     }
@@ -117,7 +132,7 @@ Wechat.prototype.fetchAccessToken = function() {
         return that.updateAccessToken()
       }
 
-      if (that.isValidAccessToken(data)) {
+      if (that.isValid(data, 'access_token')) {
         console.log('valid')
         return Promise.resolve(data)
       } else {
@@ -133,7 +148,72 @@ Wechat.prototype.fetchAccessToken = function() {
 
       return Promise.resolve(data)
     })
+}
 
+Wechat.prototype.fetchSDKTicket = function() {
+  var that = this
+
+  if (this.SDKTicket && this.SDKTicket_expires_in) {
+    var data = {
+      SDKTicket: this.SDKTicket,
+      SDKTicket_expires_in: this.SDKTicket_expires_in
+    }
+    if (this.isValid(data, 'SDKTicket')) {
+      return Promise.resolve(data)
+
+    }
+  }
+
+  return this.getSDKTicket()
+    .then(function(data) {
+      try {
+        data = JSON.parse(data)
+      } catch (e) {
+        return that.updateSDKTicket()
+      }
+
+      if (that.isValid(data, 'SDKTicket')) {
+        console.log('valid')
+        return Promise.resolve(data)
+      } else {
+        console.log('invalid')
+        return that.updateSDKTicket()
+      }
+    })
+    .then(function(data) {
+      that.SDKTicket = data.SDKTicket
+      that.SDKTicket_expires_in = data.SDKTicket_expires_in
+
+      that.saveAccessToken(data)
+
+      return Promise.resolve(data)
+    })
+}
+
+Wechat.prototype.updateSDKTicket = function() {
+  var that = this
+
+  return new Promise(function(resolve, reject) {
+    that.fetchAccessToken()
+      .then(function(data) {
+        var url = API.SDKTicket.get + '&access_token=' + data.access_token
+
+        request({ url: url, json: true })
+          .then(function(response) {
+            //console.log(response)
+
+            var _data = response.body
+            var now = new Date().getTime()
+            var ticket = {}
+            ticket.SDKTicket_expires_in = now + (_data.expires_in - 20) * 1000
+
+            ticket.SDKTicket = _data.ticket
+            console.log(ticket)
+            resolve(ticket)
+          })
+      })
+
+  })
 }
 
 Wechat.prototype.response = function() {
@@ -458,7 +538,7 @@ Wechat.prototype.sendMessage = function(message, type, groupId) {
       .then(function(data) {
         var url = API.message.sendAll + 'access_token=' + data.access_token
 
-        request({method: 'POST', url: url, body: form, json: true })
+        request({ method: 'POST', url: url, body: form, json: true })
           .then(function(response) {
             var result = response.body
             console.log(result)
@@ -514,7 +594,7 @@ Wechat.prototype.getMenu = function() {
         var url = API.menu.get + 'access_token=' + data.access_token
         console.log(url)
 
-        request({url: url, json: true })
+        request({ url: url, json: true })
           .then(function(response) {
             var menu = response.body
             console.log(menu)
@@ -542,7 +622,7 @@ Wechat.prototype.deleteMenu = function() {
         var url = API.menu.del + 'access_token=' + data.access_token
         console.log(url)
 
-        request({url: url, json: true })
+        request({ url: url, json: true })
           .then(function(response) {
             var result = response.body
             console.log(result)
