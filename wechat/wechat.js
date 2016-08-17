@@ -54,7 +54,8 @@ function Wechat(opts) {
   this.appSecret = opts.appSecret
   this.getAccessToken = opts.getAccessToken
   this.saveAccessToken = opts.saveAccessToken
-
+  this.getSDKTicket = opts.getSDKTicket
+  this.saveSDKTicket = opts.saveSDKTicket
 }
 
 Wechat.prototype.isValid = function(data, type) {
@@ -62,7 +63,7 @@ Wechat.prototype.isValid = function(data, type) {
     if (!data || !data.access_token || !data.expires_in) {
       return false
     }
-
+    var expires_in = data.expires_in
     var now = new Date().getTime()
 
     if (now < expires_in) {
@@ -74,7 +75,7 @@ Wechat.prototype.isValid = function(data, type) {
     if (!data || !data.SDKTicket || !data.SDKTicket_expires_in) {
       return false
     }
-
+    var SDKTicket_expires_in = data.SDKTicket_expires_in
     var now = new Date().getTime()
 
     if (now < SDKTicket_expires_in) {
@@ -91,7 +92,7 @@ Wechat.prototype.updateAccessToken = function() {
 
   var appID = this.appID
   var appSecret = this.appSecret
-  var url = API.SDKTicket.get + '&access_token=' + access_token
+  var url = API.accessToken + '&appid=' + appID + '&secret=' + appSecret
 
   return new Promise(function(resolve, reject) {
     request({ url: url, json: true })
@@ -103,7 +104,7 @@ Wechat.prototype.updateAccessToken = function() {
         var expires_in = now + (data.expires_in - 20) * 1000
 
         data.expires_in = expires_in
-          //console.log(data)
+        //console.log(data)
         console.log('update')
         resolve(data)
       })
@@ -184,7 +185,7 @@ Wechat.prototype.fetchSDKTicket = function() {
       that.SDKTicket = data.SDKTicket
       that.SDKTicket_expires_in = data.SDKTicket_expires_in
 
-      that.saveAccessToken(data)
+      that.saveSDKTicket(data)
 
       return Promise.resolve(data)
     })
@@ -200,15 +201,13 @@ Wechat.prototype.updateSDKTicket = function() {
 
         request({ url: url, json: true })
           .then(function(response) {
-            //console.log(response)
-
             var _data = response.body
+            //console.log(_data)
             var now = new Date().getTime()
             var ticket = {}
             ticket.SDKTicket_expires_in = now + (_data.expires_in - 20) * 1000
-
             ticket.SDKTicket = _data.ticket
-            console.log(ticket)
+
             resolve(ticket)
           })
       })
