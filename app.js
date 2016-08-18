@@ -21,12 +21,9 @@ var tpl = heredoc(function() {
       <title>搜电影</title>
     </head>
     <body>
-      <h1>点击标题，开始录音翻译</h1>
-      <p class="j-title"></p>
-      <p class="j-doctor"></p>
-      <p class="j-year"></p>
-      <div class="j-poster"></div>
-      <script src="http://www.zeptojs.cn/zepto.min.js"></script>
+      <h3 class="j-title">点击标题，开始录音翻译</h3>
+      <div class="j-movie-content"></div>
+      <script src="http://www.zeptojs.cn/zepto.min.js"></script>      
       <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
       <script>
         wx.config({
@@ -39,7 +36,12 @@ var tpl = heredoc(function() {
             'startRecord',
             'stopRecord',
             'onVoiceRecordEnd',
-            'translateVoice'
+            'translateVoice',
+            'onMenuShareTimeline',
+            'onMenuShareAppMessage',
+            'onMenuShareQQ',
+            'onMenuShareWeibo',
+            'onMenuShareQZone'
           ]
         })
         wx.ready(function(){
@@ -51,8 +53,25 @@ var tpl = heredoc(function() {
           })
           var isRecording = false
           var localId
-
-          $('.j-title').on('tap', function() {
+          //console.log($('.j-title'))
+          var content = {
+            title: '搜电影啦', // 分享标题
+            desc: '你也想来搜一下吗？', // 分享描述
+            link: 'https://github.com', // 分享链接
+            imgUrl: 'http://coding.imooc.com/static/module/common/img/logo.png', // 分享图标
+            type: '', // 分享类型,music、video或link，不填默认为link
+            dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+            success: function () { 
+              window.alert('分享成功')
+            },
+            cancel: function () { 
+              window.alert('分享失败')
+            }
+          }
+          wx.onMenuShareAppMessage(content)
+          
+          $('.j-title').on('click', function() {
+            //console.log('tap')
             if (!isRecording) {
               isRecording = true
               wx.startRecord({
@@ -69,7 +88,35 @@ var tpl = heredoc(function() {
                     localId: localId, 
                     isShowProgressTips: 1,
                     success: function (res) {
-                      alert(res.translateResult)
+                      var result = res.translateResult
+                      console.log(result)
+
+                      $.ajax({
+                        type: 'get',
+                        url: 'https://api.douban.com/v2/movie/search?q=' + result,
+                        dataType: 'jsonp',
+                        jsonp: 'callback',
+                        success: function(data) {
+                          var subject = data.subjects[0]
+                          var title = subject.title
+                          console.log(title)
+                          var director = subject.directors[0].name
+                          console.log(director)
+                          var year = subject.year
+                          console.log(year)
+                          var img = subject.images.large
+                          console.log(img)
+
+                          var html =  '<p>'+ title + '</p><p>' + director  + '</p><p>' + year + '</p><img src=" ' + img + ' ">'
+                          //console.log(html)
+                          $('.j-movie-content').html(html)
+
+                          content.title = '我搜到了《' + title + '》'
+                          content.imgUrl = img
+
+                          wx.onMenuShareAppMessage(content)
+                        }
+                      })
                     }
                   })
                 }

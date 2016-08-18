@@ -8,15 +8,16 @@
 </head>
 
 <body>
-  <h1>点击标题，开始录音翻译</h1>
-  <p class="j-title"></p>
+  <h1 class="j-title">点击标题，开始录音翻译</h1>
+  <p></p>
   <p class="j-doctor"></p>
   <p class="j-year"></p>
   <div class="j-poster"></div>
   <script src="http://www.zeptojs.cn/zepto.min.js"></script>
+  <script src="./libs/touch.js"></script>
   <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
   <script>
-  wx.config({
+  /*wx.config({
     debug: true, // 开启调试模式
     appId: '', // 必填，公众号的唯一标识
     timestamp: , // 必填，生成签名的时间戳
@@ -29,7 +30,13 @@
     success: function(res) {
 
     }
-  });
+  });*/
+    $('.j-title').on('tap', function() {
+      console.log('tap');
+    })
+    $('.j-title').on('click', function() {
+      console.log('click');
+    })
   </script>
 </body>
 
