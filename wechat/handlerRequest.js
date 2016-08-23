@@ -2,8 +2,8 @@
 
 var config = require('../config/config')
 var menu = require('./menu.js')
-var Wechat = require('./wechat')
-var wechatAPI = new Wechat(config.wechat)
+var instance = require('./wechat/wechat-instance')
+var wechatAPI = instance.getWechat()
 
 /*wechatAPI.deleteMenu().then(function() {
   return wechatAPI.createMenu(menu)

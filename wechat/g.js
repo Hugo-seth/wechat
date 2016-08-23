@@ -3,11 +3,11 @@
 var sha1 = require('sha1')
 var getRawBody = require('raw-body')
 var parseXML = require('./parseXML')
-var Wechat = require('./wechat')
+var instance = require('./wechat/wechat-instance')
 
 module.exports = function(opts, handlerRequest) {
 
-  var wechat = new Wechat(opts)
+  var wechatAPI = instance.getWechat()
 
   return function*(next) {
     console.log(this.query)
@@ -70,7 +70,7 @@ module.exports = function(opts, handlerRequest) {
 
       yield handlerRequest.call(this, next)
 
-      wechat.response.call(this)
+      wechatAPI.response.call(this)
 
       //console.log(this.status)
     }
