@@ -1,8 +1,8 @@
 'use strict'
 
 var Koa = require('koa')
-var config = require('./config/config')
-var instance = require('./wechat/wechat-instance')
+var config = require('../../config/config')
+var instance = require('../../wechat/wechatInstance')
 var ejs = require('ejs')
 var heredoc = require('heredoc')
 var crypto = require('crypto')

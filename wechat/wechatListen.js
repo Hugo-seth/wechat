@@ -3,7 +3,7 @@
 var sha1 = require('sha1')
 var getRawBody = require('raw-body')
 var parseXML = require('./parseXML')
-var instance = require('./wechat/wechat-instance')
+var instance = require('./wechatInstance')
 
 module.exports = function(opts, handlerRequest) {
 

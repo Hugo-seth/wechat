@@ -1,8 +1,10 @@
 'use strict'
 
-var server = require('./wechat/g')
-var config = require('./config/config')
-var handler = require('./wechat/handlerRequest')
+//var server = require('./wechat/wechatListen')
+//var config = require('./config/config')
+//var handler = require('./wechat/handlerRequest')
+var fs = require('fs')
+var Koa = require('koa')
 
 var mongoose = require('mongoose')
 
@@ -33,7 +35,7 @@ walk(models_path)
 
 
 var menu = require('./wechat/menu')
-var instance = require('./wechat/wechat-instance')
+var instance = require('./wechat/wechatInstance')
 var wechatAPI = instance.getWechat()
 
 /*wechatAPI.deleteMenu().then(function() {
@@ -47,14 +49,24 @@ var app = new Koa()
 var Router = require('koa-router')
 var router = new Router()
 var voiceSearch = require('./app/controllers/voiceSearch')
+var wechat = require('./app/controllers/wechat')
+
+var views = require('koa-views')
+
+app.use(views(__dirname + '/app/views', {
+  extension: 'jade'
+}))
 
 router.get('/movie', voiceSearch.movie)
 
-app
-  .use(router.router())
-  .use(router.allowMethods())
+router.get('/wechat', wechat.listen)
+router.post('/wechat', wechat.listen)
 
-app.use(server(config.wechat, handler.handlerRequest))
+app
+  .use(router.routes())
+  .use(router.allowedMethods())
+
+//app.use(server(config.wechat, handler.handlerRequest))
 
 app.listen(1234)
 console.log('Listening: 1234')

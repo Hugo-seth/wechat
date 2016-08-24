@@ -10,7 +10,7 @@ var tpl = heredoc(function() {/*
   <CreateTime><%= createTime %></CreateTime>
   <MsgType><![CDATA[<%= responseType %>]]></MsgType>
   <% if (responseType === 'text') { %>
-    <Content><![CDATA[<%= content.text %>]]></Content>
+    <Content><![CDATA[<%- content.text %>]]></Content>
   <% } else if (responseType === 'image') { %>
     <Image>
       <MediaId><![CDATA[<%= content.img %>]]></MediaId>
