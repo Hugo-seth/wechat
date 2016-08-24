@@ -10,7 +10,7 @@ var mongoose = require('mongoose')
 
 var dbUrl = 'mongodb://localhost/imooc'
 
-mongoose.connect(dbUrl)
+//mongoose.connect(dbUrl)
 
 // models loading
 var models_path = __dirname + '/app/models'
@@ -48,7 +48,7 @@ var wechatAPI = instance.getWechat()
 var app = new Koa()
 var Router = require('koa-router')
 var router = new Router()
-var voiceSearch = require('./app/controllers/voiceSearch')
+var movieCente = require('./app/controllers/movieCente')
 var wechat = require('./app/controllers/wechat')
 
 var views = require('koa-views')
@@ -57,7 +57,8 @@ app.use(views(__dirname + '/app/views', {
   extension: 'jade'
 }))
 
-router.get('/movie', voiceSearch.movie)
+router.get('/movie', movieCente.search)
+router.get('/movie/:id', movieCente.getMovie)
 
 router.get('/wechat', wechat.listen)
 router.post('/wechat', wechat.listen)

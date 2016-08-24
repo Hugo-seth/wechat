@@ -4,7 +4,7 @@ var Category = mongoose.model('Category')
 var koa_request = require('koa-request')
 
 // index page
-exports.findAll = function *() {
+exports.findAll = function*() {
   var categories = Category
     .find({})
     .populate({
@@ -19,9 +19,9 @@ exports.findAll = function *() {
 }
 
 // search page
-exports.searchByCategory = function *(catId) {
+exports.searchByCategory = function*(catId) {
   var categories = Category
-    .find({_id: catId})
+    .find({ _id: catId })
     .populate({
       path: 'movies',
       select: 'title poster',
@@ -31,16 +31,16 @@ exports.searchByCategory = function *(catId) {
   return categories
 }
 
-exports.searchByName = function *(q) {
+exports.searchByName = function*(q) {
   var movies = yield Movie
-    .find({title: new RegExp(q + '.*', 'i')})
-    .exec()     
+    .find({ title: new RegExp(q + '.*', 'i') })
+    .exec()
 
   return movies
 }
 
-exports.searchByDouban = function *(q) {
-  
+exports.searchByDouban = function*(q) {
+
   var options = {
     url: 'https://api.douban.com/v2/movie/search?q=' + encodeURIComponent(q)
   }
@@ -48,10 +48,42 @@ exports.searchByDouban = function *(q) {
   var response = yield koa_request(options)
   var data = JSON.parse(response.body)
   var subjects = []
+  var movies = []
 
   if (data && data.subjects) {
     subjects = data.subjects
   }
 
-  return subjects
+  if (subjects.length > 0) {
+    var queryArray = []
+
+    subjects.forEach(function(item) {
+      queryArray.push(function*() {
+        var movie = yield Movie.findOne({ doubanId: item.id })
+
+        if (movie) {
+          movies.push(movie)
+        } else {
+          var directors = item.directors || []
+          var director = directors[0] || {}
+
+          movie = new Movie({
+            director: director.name || '',
+            title: item.title,
+            doubanId: item.id,
+            poster: item.images.large,
+            year: item.year,
+            genres: item.genres || []
+          })
+
+          movie = yield Movie.save()
+          movies.push(movie)
+        }
+      })
+    })
+
+    yield queryArray
+  }
+
+  return movies
 }
