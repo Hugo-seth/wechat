@@ -17,10 +17,10 @@ var MovieSchema = new Schema({
     type: Number,
     default: 0
   },
-  category: {
+  category: [{
     type: ObjectId,
     ref: 'Category'
-  },
+  }],
   meta: {
     createAt: {
       type: Date,
@@ -37,8 +37,7 @@ var MovieSchema = new Schema({
 MovieSchema.pre('save', function(next) {
   if (this.isNew) {
     this.meta.createAt = this.meta.updateAt = Date.now()
-  }
-  else {
+  } else {
     this.meta.updateAt = Date.now()
   }
 
@@ -54,7 +53,7 @@ MovieSchema.statics = {
   },
   findById: function(id, cb) {
     return this
-      .findOne({_id: id})
+      .findOne({ _id: id })
       .exec(cb)
   }
 }

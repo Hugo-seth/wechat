@@ -48,12 +48,16 @@ exports.handlerRequest = function*(next) {
     } else if (request.Content === '3') {
       this.myResponse.responseType = 'image'
 
-      this.myResponse.content.img = 'BxY9DCQShdYAJf_qI21taqfFb5ZBH-UVaSG6Yh9AoTk'
+      this.myResponse.content = {
+        img: 'BxY9DCQShdYAJf_qI21taqfFb5ZBH-UVaSG6Yh9AoTk'
+      }
 
     } else if (request.Content === '4') {
       this.myResponse.responseType = 'video'
 
-      this.myResponse.content.video = 'BxY9DCQShdYAJf_qI21talnUIH-X7wllNrRMWpyn-Kc'
+      this.myResponse.content = {
+        video: 'BxY9DCQShdYAJf_qI21talnUIH-X7wllNrRMWpyn-Kc'
+      }
 
       //var getVideo = yield wechatAPI.getMaterial('BxY9DCQShdYAJf_qI21talnUIH-X7wllNrRMWpyn-Kc', 'video', {})
 
@@ -65,7 +69,9 @@ exports.handlerRequest = function*(next) {
 
       var getNews = yield wechatAPI.getMaterial('BxY9DCQShdYAJf_qI21tavnpwCeA9hvRXFANx4Blry8', 'news', {})
 
-      this.myResponse.content.news = []
+      this.myResponse.content = {
+        news: []
+      }
 
       getNews.news_item.forEach(function(item) {
         that.myResponse.content.news.push({
@@ -77,6 +83,7 @@ exports.handlerRequest = function*(next) {
       })
 
     } else {
+
       var movies = yield movie.searchByName(request.Content)
 
       if (!movies || movies.length === 0) {
@@ -84,16 +91,21 @@ exports.handlerRequest = function*(next) {
       }
 
       if (movies && movies.length > 0) {
-        movies = movies.slice(0, 5)
+        this.myResponse.responseType = 'news'
 
-        this.myResponse.content.news = []
+        movies = movies.slice(0, 5)
+        console.log(movies)
+
+        that.myResponse.content = {
+          news: []
+        }
 
         movies.forEach(function(item) {
           that.myResponse.content.news.push({
             title: item.title,
             description: item.title,
-            picurl: item.images.large,
-            url: item.alt
+            picurl: item.poster,
+            url: 'https://github.com/'
           })
         })
       } else {
@@ -108,7 +120,7 @@ exports.handlerRequest = function*(next) {
     this.myResponse.content = {
       text: 'what?'
     }
-
+    
     /*var voiceText = request.Recognition
 
     var movies = yield movie.searchByName(voiceText)
@@ -118,18 +130,28 @@ exports.handlerRequest = function*(next) {
     }
 
     if (movies && movies.length > 0) {
-      movies = movies.slice(0, 5)
+      this.myResponse.responseType = 'news'
 
-      this.myResponse.content.news = []
+      movies = movies.slice(0, 5)
+      console.log(movies)
+
+      that.myResponse.content = {
+        news: []
+      }
 
       movies.forEach(function(item) {
         that.myResponse.content.news.push({
           title: item.title,
           description: item.title,
           picurl: item.images.large,
-          url: item.alt
+          url: 'https://github.com/'
         })
       })
+    } else {
+      this.myResponse.content = {
+        text: '没有查询到与' + request.Content + '匹配的电影，你可以换个名字试试'
+      }
+
     }*/
   }
 

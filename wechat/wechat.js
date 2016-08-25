@@ -198,7 +198,8 @@ Wechat.prototype.updateSDKTicket = function() {
     that.fetchAccessToken()
       .then(function(data) {
         var url = API.SDKTicket.get + '&access_token=' + data.access_token
-
+        console.log(url)
+        
         request({ url: url, json: true })
           .then(function(response) {
             var _data = response.body

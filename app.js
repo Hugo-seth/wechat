@@ -1,16 +1,11 @@
 'use strict'
 
-//var server = require('./wechat/wechatListen')
-//var config = require('./config/config')
-//var handler = require('./wechat/handlerRequest')
 var fs = require('fs')
-var Koa = require('koa')
-
 var mongoose = require('mongoose')
 
-var dbUrl = 'mongodb://localhost/imooc'
+var dbUrl = 'mongodb://localhost/wechat'
 
-//mongoose.connect(dbUrl)
+mongoose.connect(dbUrl)
 
 // models loading
 var models_path = __dirname + '/app/models'
@@ -34,9 +29,9 @@ var walk = function(path) {
 walk(models_path)
 
 
-var menu = require('./wechat/menu')
-var instance = require('./wechat/wechatInstance')
-var wechatAPI = instance.getWechat()
+//var menu = require('./wechat/menu')
+//var instance = require('./wechat/wechatInstance')
+//var wechatAPI = instance.getWechat()
 
 /*wechatAPI.deleteMenu().then(function() {
   return wechatAPI.createMenu(menu)
@@ -44,11 +39,11 @@ var wechatAPI = instance.getWechat()
 .then(function(data) {
   console.log(data)
 })*/
-
+var Koa = require('koa')
 var app = new Koa()
 var Router = require('koa-router')
 var router = new Router()
-var movieCente = require('./app/controllers/movieCente')
+var movieCente = require('./app/controllers/movieCenter')
 var wechat = require('./app/controllers/wechat')
 
 var views = require('koa-views')

@@ -6,16 +6,17 @@ var instance = require('../../wechat/wechatInstance')
 var ejs = require('ejs')
 var heredoc = require('heredoc')
 var util = require('../../libs/util')
+var movieAPI = require('../api/movie')
 
 exports.search = function*(next) {
   var wechatAPI = instance.getWechat()
   var ticketData = yield wechatAPI.fetchSDKTicket()
   var ticket = ticketData.SDKTicket
-    //console.log(ticket)
+  console.log(ticket)
   var url = this.href.replace(':8000', '')
   var params = util.sign(ticket, url)
   console.log(params)
-  this.body = yield this.render('wechat/searchMovie', params)
+  yield this.render('wechat/searchMovie', params)
 
   return next
 }
@@ -34,8 +35,14 @@ exports.getMovie = function*(next) {
     //console.log(ticket)
   var url = this.href.replace(':8000', '')
   var params = util.sign(ticket, url)
+
+  var id = this.params.id
+
+  var movie = movieAPI.searchById(id)
+  params.movie = movie
   console.log(params)
-  this.body = yield this.render('wechat/searchMovie', params)
+
+  yield this.render('wechat/MovieDetail', params)
 
   return next
 }

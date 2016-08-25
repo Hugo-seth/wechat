@@ -2,6 +2,10 @@ var mongoose = require('mongoose')
 var Movie = mongoose.model('Movie')
 var Category = mongoose.model('Category')
 var koa_request = require('koa-request')
+var Promise = require('bluebird')
+var request = Promise.promisify(require('request'))
+var _ = require('lodash')
+var co = require('co')
 
 // index page
 exports.findAll = function*() {
@@ -37,6 +41,70 @@ exports.searchByName = function*(q) {
     .exec()
 
   return movies
+}
+
+exports.searchById = function*(id) {
+  var movie = yield Movie
+    .findOne({ _id: id })
+    .exec()
+
+  return movie
+}
+
+function updateMovies(item) {
+  var options = {
+    url: 'https://api.douban.com/v2/movie/subject/' + item.doubanId,
+    json: true
+  }
+
+  request(options).then(function(response) {
+    var data = response.body
+    console.log(data)
+    
+    _.extend(item, {
+      country: data.countries[0],
+      language: data.languages[0],
+      summary: data.summary
+    })
+
+    var genres = item.genres
+    if (!item.category) {
+      item.category = []
+    }
+
+    if (genres && genres.length > 0) {
+      var cateArray = []
+
+      genres.forEach(function(genre) {
+        cateArray.push(function *() {
+          var cat = yield Category.findOne({name: genre}).exec()
+
+          if (cat) {
+            cat.movies.push(item._id)
+            yield cat.save()
+          } else {
+            cat = new Category({
+              name: genre,
+              movies: [item._id]
+            })
+            cat = yield cat.save()
+          }
+
+          item.category.push(cat._id)
+
+          yield item.save()
+
+        })
+      })
+
+      co(function *() {
+        yield cateArray
+      })
+
+    } else {
+      item.save()
+    }
+  })
 }
 
 exports.searchByDouban = function*(q) {
@@ -76,14 +144,20 @@ exports.searchByDouban = function*(q) {
             genres: item.genres || []
           })
 
-          movie = yield Movie.save()
+          movie = yield movie.save()
           movies.push(movie)
         }
       })
     })
 
     yield queryArray
+
+    movies.forEach(function(item) {
+      updateMovies(item)
+    })
+
   }
 
   return movies
+
 }

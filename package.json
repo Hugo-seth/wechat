@@ -6,6 +6,7 @@
   "dependencies": {
     "bcrypt": "^0.8.7",
     "bluebird": "^3.4.1",
+    "co": "^4.6.0",
     "crypto": "0.0.3",
     "ejs": "^2.5.1",
     "heredoc": "^1.3.1",
