@@ -52,6 +52,7 @@ exports.searchById = function*(id) {
 }
 
 function updateMovies(item) {
+  console.log('search douban detail')
   var options = {
     url: 'https://api.douban.com/v2/movie/subject/' + item.doubanId,
     json: true
@@ -59,11 +60,11 @@ function updateMovies(item) {
 
   request(options).then(function(response) {
     var data = response.body
-    console.log(data)
-    
+      //console.log(data)
+
     _.extend(item, {
       country: data.countries[0],
-      language: data.languages[0],
+      language: data.languages ? data.languages[0] : '',
       summary: data.summary
     })
 
@@ -76,13 +77,15 @@ function updateMovies(item) {
       var cateArray = []
 
       genres.forEach(function(genre) {
-        cateArray.push(function *() {
-          var cat = yield Category.findOne({name: genre}).exec()
+        cateArray.push(function*() {
+          var cat = yield Category.findOne({ name: genre }).exec()
 
           if (cat) {
+            console.log('cate already')
             cat.movies.push(item._id)
             yield cat.save()
           } else {
+            console.log('cate exit')
             cat = new Category({
               name: genre,
               movies: [item._id]
@@ -92,22 +95,23 @@ function updateMovies(item) {
 
           item.category.push(cat._id)
 
-          yield item.save()
-
         })
       })
 
-      co(function *() {
+      co(function*() {
         yield cateArray
+        yield item.save()
       })
 
     } else {
       item.save()
     }
+
   })
 }
 
 exports.searchByDouban = function*(q) {
+  console.log('search douban')
 
   var options = {
     url: 'https://api.douban.com/v2/movie/search?q=' + encodeURIComponent(q)
@@ -144,7 +148,7 @@ exports.searchByDouban = function*(q) {
             genres: item.genres || []
           })
 
-          movie = yield movie.save()
+          //movie = yield movie.save()
           movies.push(movie)
         }
       })
@@ -152,9 +156,10 @@ exports.searchByDouban = function*(q) {
 
     yield queryArray
 
-    movies.forEach(function(item) {
+    /*movies.forEach(function(item) {
       updateMovies(item)
-    })
+    })*/
+    updateMovies(movies[0])
 
   }
 

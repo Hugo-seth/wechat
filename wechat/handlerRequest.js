@@ -94,7 +94,7 @@ exports.handlerRequest = function*(next) {
         this.myResponse.responseType = 'news'
 
         movies = movies.slice(0, 5)
-        console.log(movies)
+        //console.log(movies)
 
         that.myResponse.content = {
           news: []
@@ -117,11 +117,8 @@ exports.handlerRequest = function*(next) {
     }
 
   } else if (request.MsgType === 'voice') {
-    this.myResponse.content = {
-      text: 'what?'
-    }
     
-    /*var voiceText = request.Recognition
+    var voiceText = request.Recognition
 
     var movies = yield movie.searchByName(voiceText)
 
@@ -133,7 +130,7 @@ exports.handlerRequest = function*(next) {
       this.myResponse.responseType = 'news'
 
       movies = movies.slice(0, 5)
-      console.log(movies)
+      //console.log(movies)
 
       that.myResponse.content = {
         news: []
@@ -152,7 +149,7 @@ exports.handlerRequest = function*(next) {
         text: '没有查询到与' + request.Content + '匹配的电影，你可以换个名字试试'
       }
 
-    }*/
+    }
   }
 
   yield next
