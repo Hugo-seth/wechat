@@ -38,7 +38,7 @@ exports.getMovie = function*(next) {
 
   var id = this.params.id
 
-  var movie = movieAPI.searchById(id)
+  var movie = yield movieAPI.searchById(id)
   params.movie = movie
   console.log(params)
 

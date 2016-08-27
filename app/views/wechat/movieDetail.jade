@@ -1,3 +1,14 @@
 extends ../wechat
 
 block content
+  h3 电影详情
+  p 名称: #{movie.title}
+  p 导演: #{movie.director}
+  p 上映年份: #{movie.year}
+  p 国家: #{movie.country}
+  p 评分: #{movie.rating}
+  div
+    img(src="#{movie.poster}")
+  p 简介: #{movie.summary}
+  p
+    a(href="#{movie.doubanUrl}") 豆瓣链接

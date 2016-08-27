@@ -61,11 +61,17 @@ function updateMovies(item) {
   request(options).then(function(response) {
     var data = response.body
       //console.log(data)
-
+    var stars = []
+    data.casts.forEach(function(cast) {
+      stars.push(cast.name)
+    })
     _.extend(item, {
+      rating: data.rating.average,
       country: data.countries[0],
       language: data.languages ? data.languages[0] : '',
-      summary: data.summary
+      summary: data.summary,
+      stars: stars,
+      doubanUrl: data.mobile_url
     })
 
     var genres = item.genres
@@ -82,10 +88,13 @@ function updateMovies(item) {
 
           if (cat) {
             console.log('cate already')
-            cat.movies.push(item._id)
-            yield cat.save()
+            var movie = yield Category.findOne({ movies: item._id }).exec()
+            if (!movie) {
+              cat.movies.push(item._id)
+              yield cat.save()
+            }
           } else {
-            console.log('cate exit')
+            console.log('cate exist')
             cat = new Category({
               name: genre,
               movies: [item._id]
@@ -123,7 +132,7 @@ exports.searchByDouban = function*(q) {
   var movies = []
 
   if (data && data.subjects) {
-    subjects = data.subjects
+    subjects = data.subjects.slice(0, 10)
   }
 
   if (subjects.length > 0) {
@@ -148,7 +157,7 @@ exports.searchByDouban = function*(q) {
             genres: item.genres || []
           })
 
-          //movie = yield movie.save()
+          movie = yield movie.save()
           movies.push(movie)
         }
       })
@@ -156,10 +165,9 @@ exports.searchByDouban = function*(q) {
 
     yield queryArray
 
-    /*movies.forEach(function(item) {
+    movies.forEach(function(item) {
       updateMovies(item)
-    })*/
-    updateMovies(movies[0])
+    })
 
   }
 

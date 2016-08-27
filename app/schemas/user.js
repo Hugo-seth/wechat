@@ -1,5 +1,5 @@
 var mongoose = require('mongoose')
-//var bcrypt = require('bcrypt-nodejs')
+  //var bcrypt = require('bcrypt-nodejs')
 var bcrypt = require('bcrypt')
 
 var SALT_WORK_FACTOR = 10
@@ -36,8 +36,7 @@ UserSchema.pre('save', function(next) {
 
   if (this.isNew) {
     this.meta.createAt = this.meta.updateAt = Date.now()
-  }
-  else {
+  } else {
     this.meta.updateAt = Date.now()
   }
 
@@ -54,12 +53,15 @@ UserSchema.pre('save', function(next) {
 })
 
 UserSchema.methods = {
-  comparePassword: function(_password, cb) {
-    bcrypt.compare(_password, this.password, function(err, isMatch) {
-      if (err) return cb(err)
+  comparePassword: function(_password) {
+    var password = this.password
+    return function(cb) {
+      bcrypt.compare(_password, password, function(err, isMatch) {
 
-      cb(null, isMatch)
-    })
+        cb(err, isMatch)
+
+      })
+    }
   }
 }
 
@@ -72,7 +74,7 @@ UserSchema.statics = {
   },
   findById: function(id, cb) {
     return this
-      .findOne({_id: id})
+      .findOne({ _id: id })
       .exec(cb)
   }
 }

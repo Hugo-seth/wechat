@@ -42,6 +42,8 @@ module.exports = function(opts, handlerRequest) {
         encoding: this.charset
       })
 
+      this.body = 'success'
+
       //console.log(data.toString())
 
       var content = yield parseXML.parseXMLAsync(data)
@@ -51,8 +53,6 @@ module.exports = function(opts, handlerRequest) {
       var message = parseXML.formatMessage(content.xml)
 
       console.log(message)
-
-      this.body = ''
 
       /*if (message.MsgType === 'text') {
 
