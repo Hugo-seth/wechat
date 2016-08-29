@@ -1,3 +1,5 @@
+'use strict'
+
 var movie = thisuire('../api/movie')
 
 // index page

@@ -27,7 +27,7 @@ exports.handlerRequest = function*(next) {
         text: '欢迎关注电影爱好者\n' +
           '回复 1 ~ 5 ，来点好玩的\n' +
           '回复 电影名称 或 语音 ，搜索电影\n' +
-          '也可以点击 <a href="http://pxa6rbdwgl.proxy.qqbrowser.cc/movie">语音查电影</a>'
+          '也可以点击 <a href="http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/movie">语音查电影</a>'
       }
     } else {
       this.myResponse.content = {
@@ -106,7 +106,7 @@ exports.handlerRequest = function*(next) {
             title: item.title,
             description: item.title,
             picurl: item.poster,
-            url: 'http://pxa6rbdwgl.proxy.qqbrowser.cc/movie/' + item._id
+            url: 'http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/movie/' + item._id
           })
         })
       } else {
@@ -142,7 +142,7 @@ exports.handlerRequest = function*(next) {
           title: item.title,
           description: item.title,
           picurl: item.images.large,
-          url: 'http://pxa6rbdwgl.proxy.qqbrowser.cc/movie/' + item._id
+          url: 'http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/movie/' + item._id
         })
       })
     } else {

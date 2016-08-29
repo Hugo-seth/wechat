@@ -14,8 +14,8 @@ module.exports = function(router) {
   router.get('/admin/user/list', User.signinRequired, User.adminRequired, User.list)
 
   // wechat
-  router.get('/movie', movieCente.search)
-  router.get('/movie/:id', movieCente.getMovie)
+  router.get('/wechat/movie', movieCente.search)
+  router.get('/wechat/movie/:id', movieCente.getMovie)
 
   router.get('/wechat', wechat.listen)
   router.post('/wechat', wechat.listen)

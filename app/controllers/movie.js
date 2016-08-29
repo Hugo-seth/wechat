@@ -1,67 +1,64 @@
+'use strict'
+
 var mongoose = require('mongoose')
 var Movie = mongoose.model('Movie')
 var Category = mongoose.model('Category')
 var Comment = mongoose.model('Comment')
-var _ = require('underscore')
+var _ = require('lodash')
 var fs = require('fs')
 var path = require('path')
 
 // detail page
-exports.detail = function(req, res) {
-  var id = req.params.id
+exports.detail = function *(next) {
+  var id = this.params.id
 
-  Movie.update({_id: id}, {$inc: {pv: 1}}, function(err) {
-    if (err) {
-      console.log(err)
-    }
-  })
+  yield Movie.update({_id: id}, {$inc: {pv: 1}}).exec()
 
-  Movie.findById(id, function(err, movie) {
-    Comment
-      .find({movie: id})
-      .populate('from', 'name')
-      .populate('reply.from reply.to', 'name')
-      .exec(function(err, comments) {
-        res.render('detail', {
-          title: 'imooc 详情页',
-          movie: movie,
-          comments: comments
-        })
-      })
+  var movie = Movie.findOne({_id: id}).exec()
+  var comments = yield Comment
+    .find({movie: id})
+    .populate('from', 'name')
+    .populate('reply.from reply.to', 'name')
+    .exec()
+
+  yield this.render('pages/detail', {
+    title: 'imooc 详情页',
+    movie: movie,
+    comments: comments
   })
 }
 
 // admin new page
-exports.new = function(req, res) {
-  Category.find({}, function(err, categories) {
-    res.render('admin', {
-      title: 'imooc 后台录入页',
-      categories: categories,
-      movie: {}
-    })
+exports.new = function *(next) {
+  var categories = yield Category.find({}).exec()
+
+  yield this.render('pages/admin', {
+    title: 'imooc 后台录入页',
+    categories: categories,
+    movie: {}
   })
 }
 
 // admin update page
-exports.update = function(req, res) {
-  var id = req.params.id
+exports.update = function *(next) {
+  var id = this.params.id
 
   if (id) {
-    Movie.findById(id, function(err, movie) {
-      Category.find({}, function(err, categories) {
-        res.render('admin', {
-          title: 'imooc 后台更新页',
-          movie: movie,
-          categories: categories
-        })
-      })
+    var movie = yield Movie.findOne({_id: id}).exec()
+
+    var categories = yield Category.find({}).exec()
+
+    yield this.render('pages/admin', {
+      title: 'imooc 后台更新页',
+      movie: movie,
+      categories: categories
     })
   }
 }
 
 // admin poster
-exports.savePoster = function(req, res, next) {
-  var posterData = req.files.uploadPoster
+/*exports.savePoster = function *(next) {
+  var posterData = this.files.uploadPoster
   var filePath = posterData.path
   var originalFilename = posterData.originalFilename
 
@@ -73,7 +70,7 @@ exports.savePoster = function(req, res, next) {
       var newPath = path.join(__dirname, '../../', '/public/upload/' + poster)
 
       fs.writeFile(newPath, data, function(err) {
-        req.poster = poster
+        this.poster = poster
         next()
       })
     })
@@ -81,33 +78,26 @@ exports.savePoster = function(req, res, next) {
   else {
     next()
   }
-}
+}*/
 
 // admin post movie
-exports.save = function(req, res) {
-  var id = req.body.movie._id
-  var movieObj = req.body.movie
+exports.save = function *(next) {
+  var id = this.request.body.movie._id
+  var movieObj = this.request.body.movie
   var _movie
 
-  if (req.poster) {
-    movieObj.poster = req.poster
+  if (this.poster) {
+    movieObj.poster = this.poster
   }
 
   if (id) {
-    Movie.findById(id, function(err, movie) {
-      if (err) {
-        console.log(err)
-      }
+    var movie = yield Movie.findOne({_id: id}).exec()
 
-      _movie = _.extend(movie, movieObj)
-      _movie.save(function(err, movie) {
-        if (err) {
-          console.log(err)
-        }
+    _movie = _.extend(movie, movieObj)
+    yield _movie.save()
+        
+    this.redirect('/movie/' + movie._id)
 
-        res.redirect('/movie/' + movie._id)
-      })
-    })
   }
   else {
     _movie = new Movie(movieObj)
@@ -115,65 +105,52 @@ exports.save = function(req, res) {
     var categoryId = movieObj.category
     var categoryName = movieObj.categoryName
 
-    _movie.save(function(err, movie) {
-      if (err) {
-        console.log(err)
-      }
-      if (categoryId) {
-        Category.findById(categoryId, function(err, category) {
-          category.movies.push(movie._id)
+    var movie = yield _movie.save()
 
-          category.save(function(err, category) {
-            res.redirect('/movie/' + movie._id)
-          })
-        })
-      }
-      else if (categoryName) {
-        var category = new Category({
-          name: categoryName,
-          movies: [movie._id]
-        })
+    if (categoryId) {
+      var category = yield Category.findOne({_id: categoryId}).exec()
+      category.movies.push(movie._id)
 
-        category.save(function(err, category) {
-          movie.category = category._id
-          movie.save(function(err, movie) {
-            res.redirect('/movie/' + movie._id)
-          })
-        })
-      }
-    })
-  }
-}
-
-// list page
-exports.list = function(req, res) {
-  Movie.find({})
-    .populate('category', 'name')
-    .exec(function(err, movies) {
-      if (err) {
-        console.log(err)
-      }
-
-      res.render('list', {
-        title: 'imooc 列表页',
-        movies: movies
+      yield category.save()
+    } else if (categoryName) {
+      var category = new Category({
+        name: categoryName,
+        movies: [movie._id]
       })
-    })
+
+      yield category.save()
+
+      movie.category = category._id
+      yield movie.save()
+      this.redirect('/movie/' + movie._id)
+
+    }
+  }
+
 }
 
 // list page
-exports.del = function(req, res) {
-  var id = req.query.id
+exports.list = function *(next) {
+  var movies = yield Movie.find({})
+    .populate('category', 'name')
+    .exec()
+
+  yield this.render('pages/list', {
+    title: 'imooc 列表页',
+    movies: movies
+  })
+}
+
+// list page
+exports.del = function *(next) {
+  var id = this.query.id
 
   if (id) {
-    Movie.remove({_id: id}, function(err, movie) {
-      if (err) {
-        console.log(err)
-        res.json({success: 0})
-      }
-      else {
-        res.json({success: 1})
-      }
-    })
+    try {
+      yield Movie.remove({_id: id}).exec()
+      this.body = {success: 1}
+    } catch(err) {
+      this.body = {success: 0}
+    }
   }
 }

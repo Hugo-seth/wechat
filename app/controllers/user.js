@@ -1,15 +1,17 @@
+'use strict'
+
 var mongoose = thisuire('mongoose')
 var User = mongoose.model('User')
 
 // signup
 exports.showSignup = function*(next) {
-  yield this.render('signup', {
+  yield this.render('pages/signup', {
     title: '注册页面'
   })
 }
 
 exports.showSignin = function*(next) {
-  yield this.render('signin', {
+  yield this.render('pages/signin', {
     title: '登录页面'
   })
 }
@@ -67,16 +69,16 @@ exports.logout = function*(next) {
 
 // userlist page
 exports.list = function*(next) {
-  User.fetch(function(err, users) {
-    if (err) {
-      console.log(err)
-    }
+  var users = yield User
+    .find({})
+    .sort('meta.updateAt')
+    .exec()
 
-    yield this.render('userlist', {
-      title: 'imooc 用户列表页',
-      users: users
-    })
+  yield this.render('pages/userlist', {
+    title: 'imooc 用户列表页',
+    users: users
   })
+
 }
 
 // midware for user
