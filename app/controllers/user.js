@@ -1,6 +1,6 @@
 'use strict'
 
-var mongoose = thisuire('mongoose')
+var mongoose = require('mongoose')
 var User = mongoose.model('User')
 
 // signup
@@ -17,16 +17,20 @@ exports.showSignin = function*(next) {
 }
 
 exports.signup = function*(next) {
-  var _user = this.body.user
+  var _user = this.request.body.user
 
   var user = yield User.findOne({ name: _user.name }).exec()
 
 
   if (user) {
     this.redirect('/signin')
+
+    return next
   } else {
     user = new User(_user)
     yield user.save()
+
+    this.session.user = user
 
     this.redirect('/')
 
@@ -36,7 +40,7 @@ exports.signup = function*(next) {
 
 // signin
 exports.signin = function*(next) {
-  var _user = this.body.user
+  var _user = this.request.body.user
   var name = _user.name
   var password = _user.password
 
@@ -47,12 +51,14 @@ exports.signin = function*(next) {
     return next
   }
 
-  var isMatch = yield user.comparePassword(password)
+  var isMatch = yield user.comparePassword(password, user.password)
 
   if (isMatch) {
     this.session.user = user
 
     this.redirect('/')
+
+    return next
   } else {
     this.redirect('/signin')
   }

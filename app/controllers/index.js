@@ -1,6 +1,6 @@
 'use strict'
 
-var movie = thisuire('../api/movie')
+var movie = require('../api/movie')
 
 // index page
 exports.index = function *(next) {

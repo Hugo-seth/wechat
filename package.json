@@ -15,6 +15,7 @@
     "koa-bodyparser": "^2.2.0",
     "koa-request": "^1.0.0",
     "koa-router": "^5.4.0",
+    "koa-session": "^3.3.1",
     "koa-views": "^4.1.0",
     "lodash": "^4.15.0",
     "mongoose": "^4.5.9",

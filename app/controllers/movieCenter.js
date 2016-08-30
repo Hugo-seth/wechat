@@ -1,5 +1,8 @@
 'use strict'
 
+var mongoose = require('mongoose')
+var User = mongoose.model('User')
+
 //var Koa = require('koa')
 var config = require('../../config/config')
 var instance = require('../../wechat/wechatInstance')
@@ -7,6 +10,7 @@ var ejs = require('ejs')
 var heredoc = require('heredoc')
 var util = require('../../libs/util')
 var movieAPI = require('../api/movie')
+var koa_request = require('koa-request')
 
 exports.search = function*(next) {
   var wechatAPI = instance.getWechat()
@@ -21,14 +25,31 @@ exports.search = function*(next) {
   return next
 }
 
-/*app.use(function*(next) {
-  if (this.url.indexOf('/movie') > -1) {
+exports.getMovie = function*(next) {
+  var code = this.query.code
+  var openUrl = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' + config.wechat.appID + '&secret=' + config.wechat.appSecret + '&code=' + code + '&grant_type=authorization_code'
 
+  var response = yield koa_request({
+    url: openUrl
+  })
+
+  var data = JSON.parse(response.body)
+  console.log(data)
+  /*var openid = body.openId
+  var user = yield User.findOne({openid: openid}).exec()
+
+  if (!user) {
+    user = new User({
+      openid: openid,
+      name: ''
+    })
+
+    yield user.save()
   }
 
-  yield next
-})*/
-exports.getMovie = function*(next) {
+  this.session.user = user
+  this.state.user = user*/
+
   var wechatAPI = instance.getWechat()
   var ticketData = yield wechatAPI.fetchSDKTicket()
   var ticket = ticketData.SDKTicket
@@ -45,5 +66,15 @@ exports.getMovie = function*(next) {
   yield this.render('wechat/MovieDetail', params)
 
   return next
+}
+
+exports.jump = function *(next) {
+
+  var movieId = this.params.id 
+  var redirect = 'http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/movie/' + movieId
+  var url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' + config.wechat.appID + '&redirect_uri=' + redirect + '&response_type=code&scope=snsapi_userinfo&state=' + movieId + '#wechat_redirect'
+  //console.log(url)
+
+  this.redirect(url)
 }
 

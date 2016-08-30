@@ -2,7 +2,6 @@
 
 var fs = require('fs')
 var mongoose = require('mongoose')
-var User = mongoose.model('User')
 
 var dbUrl = 'mongodb://localhost/wechat'
 
@@ -40,14 +39,14 @@ walk(models_path)
 .then(function(data) {
   console.log(data)
 })*/
+var User = mongoose.model('User')
+
 var Koa = require('koa')
 var app = new Koa()
 var Router = require('koa-router')
 var router = new Router()
 var session = require('koa-session')
 var bodyParser = require('koa-bodyparser')
-var movieCente = require('./app/controllers/movieCenter')
-var wechat = require('./app/controllers/wechat')
 
 var views = require('koa-views')
 
@@ -59,7 +58,7 @@ app.keys = ['wechat']
 app.use(session(app))
 app.use(bodyParser())
 
-/*app.use(function *(next) {
+app.use(function *(next) {
   var user = this.session.user
 
   if (user && user._id) {
@@ -70,7 +69,9 @@ app.use(bodyParser())
   }
 
   yield next
-})*/
+})
+
+require('./config/routes')(router)
 
 app
   .use(router.routes())

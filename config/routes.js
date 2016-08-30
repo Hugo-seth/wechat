@@ -1,5 +1,10 @@
 'use strict'
 
+var Index = require('../app/controllers/index')
+var User = require('../app/controllers/user')
+var MovieCenter = require('../app/controllers/movieCenter')
+var Wechat = require('../app/controllers/wechat')
+
 module.exports = function(router) {
 
   // Index
@@ -14,11 +19,12 @@ module.exports = function(router) {
   router.get('/admin/user/list', User.signinRequired, User.adminRequired, User.list)
 
   // wechat
-  router.get('/wechat/movie', movieCente.search)
-  router.get('/wechat/movie/:id', movieCente.getMovie)
+  router.get('/wechat/movie', MovieCenter.search)
+  router.get('/wechat/movie/:id', MovieCenter.getMovie)
+  router.get('/wechat/jump/:id', MovieCenter.jump)
 
-  router.get('/wechat', wechat.listen)
-  router.post('/wechat', wechat.listen)
+  router.get('/wechat', Wechat.listen)
+  router.post('/wechat', Wechat.listen)
 
   // Movie
   /*router.get('/movie/:id', Movie.detail)

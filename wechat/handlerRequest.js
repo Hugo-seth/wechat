@@ -106,7 +106,7 @@ exports.handlerRequest = function*(next) {
             title: item.title,
             description: item.title,
             picurl: item.poster,
-            url: 'http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/movie/' + item._id
+            url: 'http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/jump/' + item._id
           })
         })
       } else {
@@ -142,7 +142,7 @@ exports.handlerRequest = function*(next) {
           title: item.title,
           description: item.title,
           picurl: item.images.large,
-          url: 'http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/movie/' + item._id
+          url: 'http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/jump/' + item._id
         })
       })
     } else {
