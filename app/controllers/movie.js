@@ -9,14 +9,14 @@ var fs = require('fs')
 var path = require('path')
 
 // detail page
-exports.detail = function *(next) {
+exports.detail = function*(next) {
   var id = this.params.id
 
-  yield Movie.update({_id: id}, {$inc: {pv: 1}}).exec()
+  yield Movie.update({ _id: id }, { $inc: { pv: 1 } }).exec()
 
-  var movie = Movie.findOne({_id: id}).exec()
+  var movie = Movie.findOne({ _id: id }).exec()
   var comments = yield Comment
-    .find({movie: id})
+    .find({ movie: id })
     .populate('from', 'name')
     .populate('reply.from reply.to', 'name')
     .exec()
@@ -29,7 +29,7 @@ exports.detail = function *(next) {
 }
 
 // admin new page
-exports.new = function *(next) {
+exports.new = function*(next) {
   var categories = yield Category.find({}).exec()
 
   yield this.render('pages/admin', {
@@ -40,11 +40,11 @@ exports.new = function *(next) {
 }
 
 // admin update page
-exports.update = function *(next) {
+exports.update = function*(next) {
   var id = this.params.id
 
   if (id) {
-    var movie = yield Movie.findOne({_id: id}).exec()
+    var movie = yield Movie.findOne({ _id: id }).exec()
 
     var categories = yield Category.find({}).exec()
 
@@ -56,32 +56,33 @@ exports.update = function *(next) {
   }
 }
 
+var util = require('../../libs/util')
+
 // admin poster
-/*exports.savePoster = function *(next) {
-  var posterData = this.files.uploadPoster
+exports.savePoster = function*(next) {
+  var posterData = this.request.body.files.uploadPoster
   var filePath = posterData.path
-  var originalFilename = posterData.originalFilename
+  var name = posterData.originalFilename
 
-  if (originalFilename) {
-    fs.readFile(filePath, function(err, data) {
-      var timestamp = Date.now()
-      var type = posterData.type.split('/')[1]
-      var poster = timestamp + '.' + type
-      var newPath = path.join(__dirname, '../../', '/public/upload/' + poster)
+  if (name) {
+    var data = yield util.readFileAsync(filePath)
 
-      fs.writeFile(newPath, data, function(err) {
-        this.poster = poster
-        next()
-      })
-    })
+    var timestamp = Date.now()
+    var type = posterData.type.split('/')[1]
+    var poster = timestamp + '.' + type
+    var newPath = path.join(__dirname, '../../', '/public/upload/' + poster)
+
+    yield util.writeFileAsync(newPath, data)
+
+    this.poster = poster
+
+    yield next()
+
   }
-  else {
-    next()
-  }
-}*/
+}
 
 // admin post movie
-exports.save = function *(next) {
+exports.save = function*(next) {
   var id = this.request.body.movie._id
   var movieObj = this.request.body.movie
   var _movie
@@ -91,15 +92,14 @@ exports.save = function *(next) {
   }
 
   if (id) {
-    var movie = yield Movie.findOne({_id: id}).exec()
+    var movie = yield Movie.findOne({ _id: id }).exec()
 
     _movie = _.extend(movie, movieObj)
     yield _movie.save()
-        
+
     this.redirect('/movie/' + movie._id)
 
-  }
-  else {
+  } else {
     _movie = new Movie(movieObj)
 
     var categoryId = movieObj.category
@@ -108,7 +108,7 @@ exports.save = function *(next) {
     var movie = yield _movie.save()
 
     if (categoryId) {
-      var category = yield Category.findOne({_id: categoryId}).exec()
+      var category = yield Category.findOne({ _id: categoryId }).exec()
       category.movies.push(movie._id)
 
       yield category.save()
@@ -130,7 +130,7 @@ exports.save = function *(next) {
 }
 
 // list page
-exports.list = function *(next) {
+exports.list = function*(next) {
   var movies = yield Movie.find({})
     .populate('category', 'name')
     .exec()
@@ -142,15 +142,15 @@ exports.list = function *(next) {
 }
 
 // list page
-exports.del = function *(next) {
+exports.del = function*(next) {
   var id = this.query.id
 
   if (id) {
     try {
-      yield Movie.remove({_id: id}).exec()
-      this.body = {success: 1}
-    } catch(err) {
-      this.body = {success: 0}
+      yield Movie.remove({ _id: id }).exec()
+      this.body = { success: 1 }
+    } catch (err) {
+      this.body = { success: 0 }
     }
   }
 }

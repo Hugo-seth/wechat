@@ -28,17 +28,6 @@ var walk = function(path) {
 }
 walk(models_path)
 
-
-//var menu = require('./wechat/menu')
-//var instance = require('./wechat/wechatInstance')
-//var wechatAPI = instance.getWechat()
-
-/*wechatAPI.deleteMenu().then(function() {
-  return wechatAPI.createMenu(menu)
-})
-.then(function(data) {
-  console.log(data)
-})*/
 var User = mongoose.model('User')
 
 var Koa = require('koa')
@@ -76,8 +65,6 @@ require('./config/routes')(router)
 app
   .use(router.routes())
   .use(router.allowedMethods())
-
-//app.use(server(config.wechat, handler.handlerRequest))
 
 app.listen(1234)
 console.log('Listening: 1234')

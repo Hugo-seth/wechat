@@ -1,11 +1,12 @@
 'use strict'
 
-var movie = require('../api/movie')
+var movieApi = require('../api/movie')
 
 // index page
 exports.index = function *(next) {
   
-  var categories = yield movie.findAll()
+  var categories = yield movieApi.findAllCategories()
+  //console.log(categories)
 
   yield this.render('pages/index', {
     title: '电影爱好者 首页',
@@ -22,7 +23,7 @@ exports.search = function *(next) {
   var index = page * count
 
   if (catId) {
-    var categories = yield movie.searchByCategory(catId)
+    var categories = yield movieApi.searchByCategory(catId)
     var category = categories[0] || {}
     var movies = category.movies || []
     var results = movies.slice(index, index + count)
@@ -37,7 +38,7 @@ exports.search = function *(next) {
     })
 
   } else {
-    var movies = yield movie.searchByName(q)
+    var movies = yield movieApi.searchByName(q)
     var results = movies.slice(index, index + count)
 
     yield this.render('pages/results', {

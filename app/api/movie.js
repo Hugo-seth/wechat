@@ -8,7 +8,7 @@ var _ = require('lodash')
 var co = require('co')
 
 // index page
-exports.findAll = function*() {
+exports.findAllCategories = function*() {
   var categories = Category
     .find({})
     .populate({

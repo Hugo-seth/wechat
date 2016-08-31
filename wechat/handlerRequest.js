@@ -7,11 +7,11 @@ var instance = require('./wechatInstance')
 var wechatAPI = instance.getWechat()
 
 /*wechatAPI.deleteMenu().then(function() {
-  return wechatAPI.createMenu(menu)
-})
-.then(function(data) {
-  console.log(data)
-})*/
+    return wechatAPI.createMenu(menu)
+  })
+  .then(function(data) {
+    console.log(data)
+  })*/
 
 exports.handlerRequest = function*(next) {
   var that = this
@@ -28,6 +28,23 @@ exports.handlerRequest = function*(next) {
           '回复 1 ~ 5 ，来点好玩的\n' +
           '回复 电影名称 或 语音 ，搜索电影\n' +
           '也可以点击 <a href="http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/movie">语音查电影</a>'
+      }
+    } else if (request.Event === 'CLICK') {
+      if (request.EventKey === 'high_fifty_rating') {
+
+      } else if (request.EventKey === 'new_twenty') {
+
+      } else if (request.EventKey === 'action_movies') {
+
+      } else if (request.EventKey === 'science_fiction_movies') {
+
+      } else if (request.EventKey === 'suspense_movies') {
+
+      } else if (request.EventKey === 'help') {
+
+      }
+      this.myResponse.content = {
+        text: request.Event + request.EventKey
       }
     } else {
       this.myResponse.content = {
@@ -95,7 +112,7 @@ exports.handlerRequest = function*(next) {
         this.myResponse.responseType = 'news'
 
         movies = movies.slice(0, 5)
-        //console.log(movies)
+          //console.log(movies)
 
         that.myResponse.content = {
           news: []
@@ -118,7 +135,7 @@ exports.handlerRequest = function*(next) {
     }
 
   } else if (request.MsgType === 'voice') {
-    
+
     var voiceText = request.Recognition
 
     var movies = yield movie.searchByName(voiceText)
@@ -131,7 +148,7 @@ exports.handlerRequest = function*(next) {
       this.myResponse.responseType = 'news'
 
       movies = movies.slice(0, 5)
-      //console.log(movies)
+        //console.log(movies)
 
       that.myResponse.content = {
         news: []
