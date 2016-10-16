@@ -1,4 +1,4 @@
-wechat by node
+# node.js 开发微信公众号
 
 config/config.js :
 
