@@ -10,9 +10,9 @@ module.exports = function(opts, handlerRequest) {
   var wechatAPI = instance.getWechat()
 
   return function*(next) {
-    console.log(this.query)
+    //console.log(this.query)
     var that = this
-    //console.log(this)
+    console.log(this)
 
     var token = opts.token
     var signature = this.query.signature

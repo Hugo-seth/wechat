@@ -38,12 +38,13 @@ module.exports = function(router) {
   router.delete('/admin/movie/list', User.signinRequired, User.adminRequired, Movie.del)
 
   // Comment
-  router.post('/user/comment', User.signinRequired, Comment.save)
+  router.get('/hello', Movie.hello)
+  //router.post('/user/comment', User.signinRequired, Comment.save)
 
   // Category
-  router.get('/admin/category/new', User.signinRequired, User.adminRequired, Category.new)
-  router.post('/admin/category', User.signinRequired, User.adminRequired, Category.save)
-  router.get('/admin/category/list', User.signinRequired, User.adminRequired, Category.list)
+  //router.get('/admin/category/new', User.signinRequired, User.adminRequired, Category.new)
+  //router.post('/admin/category', User.signinRequired, User.adminRequired, Category.save)
+  //router.get('/admin/category/list', User.signinRequired, User.adminRequired, Category.list)
 
   // results
   router.get('/results', Index.search)

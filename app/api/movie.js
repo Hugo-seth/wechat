@@ -94,7 +94,7 @@ function updateMovies(item) {
               yield cat.save()
             }
           } else {
-            console.log('cate exist')
+            console.log('cate not exist')
             cat = new Category({
               name: genre,
               movies: [item._id]

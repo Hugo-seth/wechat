@@ -12,19 +12,20 @@ var path = require('path')
 exports.detail = function*(next) {
   var id = this.params.id
 
-  yield Movie.update({ _id: id }, { $inc: { pv: 1 } }).exec()
+  //yield Movie.update({ _id: id }, { $inc: { pv: 1 } }).exec()
 
-  var movie = Movie.findOne({ _id: id }).exec()
-  var comments = yield Comment
+  var movie = yield Movie.findOne({ _id: id }).exec()
+  //console.log(movie)
+  /*var comments = yield Comment
     .find({ movie: id })
     .populate('from', 'name')
     .populate('reply.from reply.to', 'name')
-    .exec()
+    .exec()*/
 
   yield this.render('pages/detail', {
     title: 'imooc 详情页',
     movie: movie,
-    comments: comments
+    comments: []
   })
 }
 
@@ -153,4 +154,12 @@ exports.del = function*(next) {
       this.body = { success: 0 }
     }
   }
+}
+
+var movieApi = require('../api/movie')
+
+exports.hello = function*(next) {
+  var movie = yield movieApi.searchById('57c14a61af5ca7a6069041be')
+  //console.log(movie)
+  this.body = movie.id + ':' + movie._id
 }

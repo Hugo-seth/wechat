@@ -36,6 +36,7 @@ var Router = require('koa-router')
 var router = new Router()
 var session = require('koa-session')
 var bodyParser = require('koa-bodyparser')
+var cors = require('kcors')
 
 var views = require('koa-views')
 
@@ -46,6 +47,7 @@ app.use(views(__dirname + '/app/views', {
 app.keys = ['wechat']
 app.use(session(app))
 app.use(bodyParser())
+app.use(cors())
 
 app.use(function *(next) {
   var user = this.session.user
