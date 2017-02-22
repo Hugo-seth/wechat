@@ -73,37 +73,37 @@ exports.logout = function*(next) {
   this.redirect('/')
 }
 
-// userlist page
-exports.list = function*(next) {
-  var users = yield User
-    .find({})
-    .sort('meta.updateAt')
-    .exec()
+// // userlist page
+// exports.list = function*(next) {
+//   var users = yield User
+//     .find({})
+//     .sort('meta.updateAt')
+//     .exec()
 
-  yield this.render('pages/userlist', {
-    title: 'imooc 用户列表页',
-    users: users
-  })
+//   yield this.render('pages/userlist', {
+//     title: 'imooc 用户列表页',
+//     users: users
+//   })
 
-}
+// }
 
-// midware for user
-exports.signinRequired = function*(next) {
-  var user = this.session.user
+// // midware for user
+// exports.signinRequired = function*(next) {
+//   var user = this.session.user
 
-  if (!user) {
-    this.redirect('/signin')
-  }
+//   if (!user) {
+//     this.redirect('/signin')
+//   }
 
-  yield next
-}
+//   yield next
+// }
 
-exports.adminRequired = function*(next) {
-  var user = this.session.user
+// exports.adminRequired = function*(next) {
+//   var user = this.session.user
 
-  if (user.role <= 10) {
-    this.redirect('/signin')
-  }
+//   if (user.role <= 10) {
+//     this.redirect('/signin')
+//   }
 
-  yield next
-}
+//   yield next
+// }

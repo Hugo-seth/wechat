@@ -1,1 +1,1 @@
-{"SDKTicket_expires_in":1472554889739,"SDKTicket":"kgt8ON7yVITDhtdwci0qeYR0kX701Owz3208UNOv9V_Jep-jVLqf6cr6XbTud4Q5Awvl395EI1-o5dyQCEo-Bg"}
+{"SDKTicket_expires_in":1487666994833,"SDKTicket":"kgt8ON7yVITDhtdwci0qeYR0kX701Owz3208UNOv9V-H24J7xx-EA_gzyp3efZFoKhHggH9sKFPQhSnR6NezKA"}

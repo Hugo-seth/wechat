@@ -54,17 +54,6 @@ module.exports = function(opts, handlerRequest) {
 
       console.log(message)
 
-      /*if (message.MsgType === 'text') {
-
-        var now = new Date().getTime()
-
-        that.status = 200
-        that.type = 'application/xml'
-        that.body = '<xml><ToUserName><![CDATA[' + message.FromUserName + ']]></ToUserName><FromUserName><![CDATA[' + message.ToUserName + ']]></FromUserName><CreateTime>' + now + '</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[来了，请坐]]></Content></xml>'
-
-      }
-      console.log(that.body)*/
-
       this.request = message
       this.myResponse = {}
 
