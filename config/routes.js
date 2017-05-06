@@ -23,11 +23,9 @@ module.exports = function(router) {
   // wechat
   router.get('/wechat/movie', WechatMovie.search)
   router.get('/wechat/movie/:id', WechatMovie.getMovie)
-  router.get('/wechat/jump/:id', WechatMovie.jump)
+    // router.get('/wechat/jump/:id', WechatMovie.jump)
 
   router.get('/wechat', Wechat.listen)
   router.post('/wechat', Wechat.listen)
-
-  // test
 
 }

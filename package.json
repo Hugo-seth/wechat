@@ -4,7 +4,7 @@
   "description": "wechat by node",
   "main": "app.js",
   "scripts": {
-    "start": "node app"
+    "start": "./node_modules/.bin/nodemon app"
   },
   "dependencies": {
     "bcrypt": "^0.8.7",
@@ -27,9 +27,12 @@
     "raw-body": "^2.1.7",
     "request": "^2.72.0",
     "sha1": "^1.1.1",
+    "urlencode": "^1.1.0",
     "xml2js": "^0.4.17"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Hugo-seth/wechat.git"

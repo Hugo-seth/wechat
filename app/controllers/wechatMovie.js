@@ -1,5 +1,5 @@
 'use strict'
-
+var urlencode = require('urlencode')
 var mongoose = require('mongoose')
 var User = mongoose.model('User')
 
@@ -26,41 +26,29 @@ exports.search = function*(next) {
 }
 
 exports.getMovie = function*(next) {
-  var code = this.query.code
-  var openUrl = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' + config.wechat.appID + '&secret=' + config.wechat.appSecret + '&code=' + code + '&grant_type=authorization_code'
+  // var code = this.query.code
+  // var openUrl = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' + config.wechat.appID + '&secret=' + config.wechat.appSecret + '&code=' + code + '&grant_type=authorization_code'
 
-  var response = yield koa_request({
-    url: openUrl
-  })
+  // var response = yield koa_request({
+  //   url: openUrl
+  // })
 
-  var data = JSON.parse(response.body)
-  console.log(data)
-  /*var openid = body.openId
-  var user = yield User.findOne({openid: openid}).exec()
+  // var data = JSON.parse(response.body)
+  // console.log(data)
 
-  if (!user) {
-    user = new User({
-      openid: openid,
-      name: ''
-    })
-
-    yield user.save()
-  }
-
-  this.session.user = user
-  this.state.user = user*/
-
-  var wechatAPI = instance.getWechat()
-  var ticketData = yield wechatAPI.fetchSDKTicket()
-  var ticket = ticketData.SDKTicket
-    //console.log(ticket)
-  var url = this.href.replace(':8000', '')
-  var params = util.sign(ticket, url)
+  // var wechatAPI = instance.getWechat()
+  // var ticketData = yield wechatAPI.fetchSDKTicket()
+  // var ticket = ticketData.SDKTicket
+  //   //console.log(ticket)
+  // var url = this.href.replace(':8000', '')
+  // var params = util.sign(ticket, url)
 
   var id = this.params.id
 
   var movie = yield movieAPI.searchById(id)
-  params.movie = movie
+  var params = {
+    movie: movie
+  }
   console.log(params)
 
   yield this.render('wechat/MovieDetail', params)
@@ -68,13 +56,11 @@ exports.getMovie = function*(next) {
   return next
 }
 
-exports.jump = function *(next) {
+// exports.jump = function*(next) {
+//   var movieId = this.params.id
+//   var redirect = urlencode(config.wechat.domain + '/movie/' + movieId)
+//   var url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' + config.wechat.appID + '&redirect_uri=' + redirect + '&response_type=code&scope=snsapi_userinfo&state=' + movieId + '#wechat_redirect'
+//   console.log(url)
 
-  var movieId = this.params.id 
-  var redirect = 'http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/movie/' + movieId
-  var url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' + config.wechat.appID + '&redirect_uri=' + redirect + '&response_type=code&scope=snsapi_userinfo&state=' + movieId + '#wechat_redirect'
-  //console.log(url)
-
-  this.redirect(url)
-}
-
+//   this.redirect(url)
+// }
