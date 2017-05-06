@@ -12,7 +12,7 @@ module.exports = function(opts, handlerRequest) {
   return function*(next) {
     //console.log(this.query)
     var that = this
-    console.log(this)
+      // console.log(this)
 
     var token = opts.token
     var signature = this.query.signature

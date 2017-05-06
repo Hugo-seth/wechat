@@ -6,12 +6,12 @@ var movie = require('../app/api/movie')
 var instance = require('./wechatInstance')
 var wechatAPI = instance.getWechat()
 
-/*wechatAPI.deleteMenu().then(function() {
-    return wechatAPI.createMenu(menu)
-  })
-  .then(function(data) {
-    console.log(data)
-  })*/
+// wechatAPI.deleteMenu().then(function() {
+//     return wechatAPI.createMenu(menu)
+//   })
+//   .then(function(data) {
+//     console.log(data)
+//   })
 
 exports.handlerRequest = function*(next) {
   var that = this
@@ -27,7 +27,7 @@ exports.handlerRequest = function*(next) {
         text: '欢迎关注电影爱好者\n' +
           '回复 1 ~ 5 ，来点好玩的\n' +
           '回复 电影名称 或 语音 ，搜索电影\n' +
-          '也可以点击 <a href="http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/movie">语音查电影</a>'
+          '也可以点击 <a href="' + config.wechat.domain + '/movie">语音查电影</a>'
       }
     } else if (request.Event === 'CLICK') {
       if (request.EventKey === 'high_fifty_rating') {
@@ -123,7 +123,7 @@ exports.handlerRequest = function*(next) {
             title: item.title,
             description: item.title,
             picurl: item.poster,
-            url: 'http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/jump/' + item._id
+            url: config.wechat.domain + '/movie/' + item._id
           })
         })
       } else {
@@ -159,7 +159,7 @@ exports.handlerRequest = function*(next) {
           title: item.title,
           description: item.title,
           picurl: item.images.large,
-          url: 'http://pxa6rbdwgl.proxy.qqbrowser.cc/wechat/jump/' + item._id
+          url: config.wechat.domain + '/movie/' + item._id
         })
       })
     } else {
