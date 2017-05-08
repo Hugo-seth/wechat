@@ -1,15 +1,15 @@
-var mongoose = require('mongoose')
-var Movie = mongoose.model('Movie')
-var Category = mongoose.model('Category')
-var koa_request = require('koa-request')
-var Promise = require('bluebird')
-var request = Promise.promisify(require('request'))
-var _ = require('lodash')
-var co = require('co')
+const mongoose = require('mongoose')
+const Movie = mongoose.model('Movie')
+const Category = mongoose.model('Category')
+
+const co = require('co')
+const doubanApi = require('../api/douban')
+
+mongoose.Promise = Promise
 
 // index page
-exports.findAllCategories = function*() {
-  var categories = Category
+exports.findAllCategories = async function() {
+  return Category
     .find({})
     .populate({
       path: 'movies',
@@ -17,38 +17,71 @@ exports.findAllCategories = function*() {
       options: { limit: 6 }
     })
     .exec()
-
-  return categories
-
 }
 
-// search page
-exports.searchByCategory = function*(catId) {
-  var categories = Category
-    .find({ _id: catId })
-    .populate({
-      path: 'movies',
-      select: 'title poster',
-    })
-    .exec()
-
-  return categories
-}
-
-exports.searchByName = function*(q) {
-  var movies = yield Movie
+// search
+exports.searchByName = async function(q) {
+  return Movie
     .find({ title: new RegExp(q + '.*', 'i') })
     .exec()
-
-  return movies
 }
 
-exports.searchById = function*(id) {
-  var movie = yield Movie
+exports.searchById = async function(id) {
+  return Movie
     .findOne({ _id: id })
     .exec()
+}
 
-  return movie
+exports.searchByDouban = async function(query) {
+  console.log('search douban')
+
+  doubanApi('get', 'https://api.douban.com/v2/movie/search', { q: query })
+
+  // var response = yield koaRequest(options)
+  // var data = JSON.parse(response.body)
+  // var subjects = []
+  // var movies = []
+
+  // if (data && data.subjects) {
+  //   subjects = data.subjects.slice(0, 10)
+  // }
+
+  // if (subjects.length > 0) {
+  //   var queryArray = []
+
+  //   subjects.forEach(function(item) {
+  //     queryArray.push(function*() {
+  //       var movie = yield Movie.findOne({ doubanId: item.id })
+
+  //       if (movie) {
+  //         movies.push(movie)
+  //       } else {
+  //         var directors = item.directors || []
+  //         var director = directors[0] || {}
+
+  //         movie = new Movie({
+  //           director: director.name || '',
+  //           title: item.title,
+  //           doubanId: item.id,
+  //           poster: item.images.large,
+  //           year: item.year,
+  //           genres: item.genres || []
+  //         })
+
+  //         movie = yield movie.save()
+  //         movies.push(movie)
+  //       }
+  //     })
+  //   })
+
+  //   yield queryArray
+
+  //   movies.forEach(function(item) {
+  //     updateMovies(item)
+  //   })
+
+  // }
+  // return movies
 }
 
 function updateMovies(item) {
@@ -65,7 +98,7 @@ function updateMovies(item) {
     data.casts.forEach(function(cast) {
       stars.push(cast.name)
     })
-    _.extend(item, {
+    Object.assign(item, {
       rating: data.rating.average,
       country: data.countries[0],
       language: data.languages ? data.languages[0] : '',
@@ -115,62 +148,5 @@ function updateMovies(item) {
     } else {
       item.save()
     }
-
   })
-}
-
-exports.searchByDouban = function*(q) {
-  console.log('search douban')
-
-  var options = {
-    url: 'https://api.douban.com/v2/movie/search?q=' + encodeURIComponent(q)
-  }
-
-  var response = yield koa_request(options)
-  var data = JSON.parse(response.body)
-  var subjects = []
-  var movies = []
-
-  if (data && data.subjects) {
-    subjects = data.subjects.slice(0, 10)
-  }
-
-  if (subjects.length > 0) {
-    var queryArray = []
-
-    subjects.forEach(function(item) {
-      queryArray.push(function*() {
-        var movie = yield Movie.findOne({ doubanId: item.id })
-
-        if (movie) {
-          movies.push(movie)
-        } else {
-          var directors = item.directors || []
-          var director = directors[0] || {}
-
-          movie = new Movie({
-            director: director.name || '',
-            title: item.title,
-            doubanId: item.id,
-            poster: item.images.large,
-            year: item.year,
-            genres: item.genres || []
-          })
-
-          movie = yield movie.save()
-          movies.push(movie)
-        }
-      })
-    })
-
-    yield queryArray
-
-    movies.forEach(function(item) {
-      updateMovies(item)
-    })
-
-  }
-
-  return movies
-
 }

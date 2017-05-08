@@ -1,65 +1,52 @@
-'use strict'
+const fs = require('fs')
+const mongoose = require('mongoose')
+const Koa = require('koa')
+const Router = require('koa-router')
+const bodyParser = require('koa-bodyparser')
+const views = require('koa-views')
+const serve = require('koa-static')
 
-var fs = require('fs')
-var mongoose = require('mongoose')
-
-var dbUrl = 'mongodb://localhost/wechat'
+const dbUrl = 'mongodb://localhost/wechat'
 
 mongoose.connect(dbUrl)
 
 // models loading
-var models_path = __dirname + '/app/models'
-var walk = function(path) {
+const models_path = __dirname + '/app/models'
+const walk = function(path) {
   fs
     .readdirSync(path)
     .forEach(function(file) {
-      var newPath = path + '/' + file
-      var stat = fs.statSync(newPath)
+      let newPath = path + '/' + file
+      let stat = fs.statSync(newPath)
 
       if (stat.isFile()) {
         if (/(.*)\.(js|coffee)/.test(file)) {
           require(newPath)
         }
-      }
-      else if (stat.isDirectory()) {
+      } else if (stat.isDirectory()) {
         walk(newPath)
       }
     })
 }
 walk(models_path)
 
-var User = mongoose.model('User')
+const app = new Koa()
+const router = new Router()
 
-var Koa = require('koa')
-var app = new Koa()
-var Router = require('koa-router')
-var router = new Router()
-var session = require('koa-session')
-var bodyParser = require('koa-bodyparser')
-var cors = require('kcors')
-
-var views = require('koa-views')
+app.use(serve(__dirname + '/app/static'))
 
 app.use(views(__dirname + '/app/views', {
-  extension: 'jade'
+  extension: 'pug'
 }))
 
-app.keys = ['wechat']
-app.use(session(app))
 app.use(bodyParser())
-app.use(cors())
 
-app.use(function *(next) {
-  var user = this.session.user
+app.use(async(ctx, next) => {
+  const start = new Date()
 
-  if (user && user._id) {
-    this.session.user = yield User.findOne({_id: user._id}).exec()
-    this.state.user = this.session.user
-  } else {
-    this.state.user = null
-  }
-
-  yield next
+  await next()
+  const ms = new Date() - start
+  console.log(`${ctx.method} ${decodeURIComponent(ctx.url)} - ${ms}ms`)
 })
 
 require('./config/routes')(router)
@@ -70,4 +57,3 @@ app
 
 app.listen(1234)
 console.log('Listening: 1234')
-

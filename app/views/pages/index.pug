@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+  .container
+    .row
+      each cat in categories
+        .panel.panel-default
+          .panel-heading
+            h3
+              a(href='/results?cat=#{cat._id}&p=0') #{cat.name}
+          .panel-body
+            .row
+              if cat.movies && cat.movies.length > 0
+                each item in cat.movies
+                  .col-sm-3
+                    img(src=item.poster, alt=item.title)
+                    h4(class="movie-title") #{item.title}

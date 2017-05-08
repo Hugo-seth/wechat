@@ -1,16 +1,13 @@
-'use strict'
-
-var sha1 = require('sha1')
-var getRawBody = require('raw-body')
-var parseXML = require('./parseXML')
-var instance = require('./wechatInstance')
+const sha1 = require('sha1')
+const getRawBody = require('raw-body')
+const parseXML = require('./parseXML')
+const instance = require('./wechatInstance')
 
 module.exports = function(opts, handlerRequest) {
 
   var wechatAPI = instance.getWechat()
 
   return function*(next) {
-    //console.log(this.query)
     var that = this
       // console.log(this)
 

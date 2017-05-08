@@ -1,219 +1,135 @@
-'use strict'
+const fs = require('fs')
+const Promise = require('bluebird')
+const request = require('./httpService')
+const parseXML = require('./parseXML')
 
-var Promise = require('bluebird')
-var request = Promise.promisify(require('request'))
-var parseXML = require('./parseXML')
-var fs = require('fs')
-var _ = require('lodash')
-
-var baseUrl = 'https://api.weixin.qq.com/cgi-bin'
-
-var API = {
-  accessToken: baseUrl + '/token?grant_type=client_credential',
-  temp: {
-    uploadMedia: baseUrl + '/media/upload?',
-    getMedia: baseUrl + '/media/get?'
-  },
-  permanent: {
-    addNews: baseUrl + '/material/add_news?',
-    addNewsImg: baseUrl + '/media/uploadimg?',
-    addMaterial: baseUrl + '/material/add_material?',
-    getMaterial: baseUrl + '/material/get_material?',
-    count: baseUrl + '/material/get_materialcount?',
-    getMaterialList: baseUrl + '/material/batchget_material?'
-  },
-  group: {
-    create: baseUrl + '/groups/create?',
-    get: baseUrl + '/groups/get?',
-    getUserGroup: baseUrl + '/cgi-bin/groups/getid?',
-    updateGroup: baseUrl + '/cgi-bin/groups/update?',
-    removeUser: baseUrl + '/cgi-bin/groups/members/update?',
-    batchRemove: baseUrl + '/groups/members/batchupdate?',
-    del: baseUrl + '/groups/delete?'
-  },
-  user: {
-    getUserInfo: baseUrl + '/user/info?lang=zh_CN',
-    batchGet: baseUrl + '/user/info/batchget?'
-  },
-  message: {
-    sendAll: baseUrl + '/message/mass/sendall?'
-  },
-  menu: {
-    create: baseUrl + '/menu/create?',
-    get: baseUrl + '/menu/get?',
-    del: baseUrl + '/menu/delete?'
-  },
-  SDKTicket: {
-    get: baseUrl + '/ticket/getticket?type=jsapi'
-  }
-}
-
-function Wechat(opts) {
-  var that = this
-  this.appID = opts.appID
-  this.appSecret = opts.appSecret
-  this.getAccessToken = opts.getAccessToken
-  this.saveAccessToken = opts.saveAccessToken
-  this.getSDKTicket = opts.getSDKTicket
-  this.saveSDKTicket = opts.saveSDKTicket
-}
-
-Wechat.prototype.isValid = function(data, type) {
-  if (type === 'access_token') {
-    if (!data || !data.access_token || !data.expires_in) {
-      return false
-    }
-    var expires_in = data.expires_in
-    var now = new Date().getTime()
-
-    if (now < expires_in) {
-      return true
-    } else {
-      return false
-    }
-  } else {
-    if (!data || !data.SDKTicket || !data.SDKTicket_expires_in) {
-      return false
-    }
-    var SDKTicket_expires_in = data.SDKTicket_expires_in
-    var now = new Date().getTime()
-
-    if (now < SDKTicket_expires_in) {
-      return true
-    } else {
-      return false
-    }
+class Wechat {
+  constructor(config) {
+    this.appID = config.appID
+    this.appSecret = config.appSecret
+    this.readAccessTokenFile = config.readAccessTokenFile
+    this.writeAccessTokenFile = config.writeAccessTokenFile
+    this.readSDKTicketFile = config.readSDKTicketFile
+    this.writeSDKTicketFile = config.writeSDKTicketFile
   }
 
-}
-
-Wechat.prototype.updateAccessToken = function() {
-  var that = this
-
-  var appID = this.appID
-  var appSecret = this.appSecret
-  var url = API.accessToken + '&appid=' + appID + '&secret=' + appSecret
-
-  return new Promise(function(resolve, reject) {
-    request({ url: url, json: true })
-      .then(function(response) {
-        //console.log(response)
-
-        var data = response.body
-        var now = new Date().getTime()
-        var expires_in = now + (data.expires_in - 20) * 1000
-
-        data.expires_in = expires_in
-        //console.log(data)
-        console.log('update')
-        resolve(data)
-      })
-  })
-}
-
-Wechat.prototype.fetchAccessToken = function() {
-  var that = this
-
-  if (this.access_token && this.expires_in) {
-    var data = {
-      access_token: this.access_token,
-      expires_in: this.expires_in
+  isValid(data, type) {
+    if (!data || !data[type] || !data.expires_in) {
+      return false
     }
-    if (this.isValid(data, 'access_token')) {
-      return Promise.resolve(data)
+    let now = new Date().getTime()
+    if (now < data.expires_in) return true
 
-    }
+    return false
   }
 
-  return this.getAccessToken()
-    .then(function(data) {
-      try {
-        data = JSON.parse(data)
-      } catch (e) {
-        return that.updateAccessToken()
+  updateAccessToken() {
+    const that = this
+    const url = API.accessToken + '&appid=' + this.appID + '&secret=' + this.appSecret
+
+    return new Promise(function(resolve, reject) {
+      request('get', url)
+        .then(data => {
+          data.expires_in = new Date().getTime() + (data.expires_in - 20) * 1000
+          resolve(data)
+        })
+    })
+  }
+
+  fetchAccessToken() {
+    const that = this
+
+    if (this.access_token && this.expires_in) {
+      let data = {
+        access_token: this.access_token,
+        expires_in: this.expires_in
       }
-
-      if (that.isValid(data, 'access_token')) {
-        console.log('valid')
+      if (this.isValid(data, 'access_token')) {
         return Promise.resolve(data)
-      } else {
-        console.log('invalid')
-        return that.updateAccessToken()
       }
-    })
-    .then(function(data) {
-      that.access_token = data.access_token
-      that.expires_in = data.expires_in
-
-      that.saveAccessToken(data)
-
-      return Promise.resolve(data)
-    })
-}
-
-Wechat.prototype.fetchSDKTicket = function() {
-  var that = this
-
-  if (this.SDKTicket && this.SDKTicket_expires_in) {
-    var data = {
-      SDKTicket: this.SDKTicket,
-      SDKTicket_expires_in: this.SDKTicket_expires_in
     }
-    if (this.isValid(data, 'SDKTicket')) {
-      return Promise.resolve(data)
 
-    }
+    return this.readAccessTokenFile()
+      .then(data => {
+        try {
+          data = JSON.parse(data)
+        } catch (e) {
+          return that.updateAccessToken()
+        }
+
+        if (that.isValid(data, 'access_token')) {
+          return Promise.resolve(data)
+        } else {
+          return that.updateAccessToken()
+        }
+      })
+      .then(data => {
+        that.access_token = data.access_token
+        that.expires_in = data.expires_in
+        that.writeAccessTokenFile(data)
+
+        return Promise.resolve(data)
+      })
   }
 
-  return this.getSDKTicket()
-    .then(function(data) {
-      try {
-        data = JSON.parse(data)
-      } catch (e) {
-        return that.updateSDKTicket()
-      }
+  updateSDKTicket() {
+    const that = this
 
-      if (that.isValid(data, 'SDKTicket')) {
-        console.log('valid')
+    return new Promise(function(resolve, reject) {
+      that.fetchAccessToken()
+        .then(function(data) {
+          var url = API.SDKTicket.get + '&access_token=' + data.access_token
+
+          request({ url: url, json: true })
+            .then(function(response) {
+              var _data = response.body
+                //console.log(_data)
+              var now = new Date().getTime()
+              var ticket = {}
+              ticket.SDKTicket_expires_in = now + (_data.expires_in - 20) * 1000
+              ticket.SDKTicket = _data.ticket
+
+              resolve(ticket)
+            })
+        })
+    })
+  }
+
+  fetchSDKTicket() {
+    const that = this
+
+    if (this.SDKTicket && this.SDKTicket_expires_in) {
+      let data = {
+        SDKTicket: this.SDKTicket,
+        SDKTicket_expires_in: this.SDKTicket_expires_in
+      }
+      if (this.isValid(data, 'SDKTicket')) {
         return Promise.resolve(data)
-      } else {
-        console.log('invalid')
-        return that.updateSDKTicket()
       }
-    })
-    .then(function(data) {
-      that.SDKTicket = data.SDKTicket
-      that.SDKTicket_expires_in = data.SDKTicket_expires_in
+    }
 
-      that.saveSDKTicket(data)
+    return this.readSDKTicketFile()
+      .then(data => {
+        try {
+          data = JSON.parse(data)
+        } catch (e) {
+          return that.updateSDKTicket()
+        }
 
-      return Promise.resolve(data)
-    })
-}
-
-Wechat.prototype.updateSDKTicket = function() {
-  var that = this
-
-  return new Promise(function(resolve, reject) {
-    that.fetchAccessToken()
-      .then(function(data) {
-        var url = API.SDKTicket.get + '&access_token=' + data.access_token
-        console.log(url)
-        
-        request({ url: url, json: true })
-          .then(function(response) {
-            var _data = response.body
-            //console.log(_data)
-            var now = new Date().getTime()
-            var ticket = {}
-            ticket.SDKTicket_expires_in = now + (_data.expires_in - 20) * 1000
-            ticket.SDKTicket = _data.ticket
-
-            resolve(ticket)
-          })
+        if (that.isValid(data, 'SDKTicket')) {
+          return Promise.resolve(data)
+        } else {
+          return that.updateSDKTicket()
+        }
       })
+      .then(data => {
+        that.SDKTicket = data.SDKTicket
+        that.SDKTicket_expires_in = data.SDKTicket_expires_in
+        that.writeSDKTicketFile(data)
 
-  })
+        return Promise.resolve(data)
+      })
+  }
 }
 
 Wechat.prototype.response = function() {
@@ -229,36 +145,32 @@ Wechat.prototype.response = function() {
 }
 
 Wechat.prototype.uploadMaterial = function(type, material, permanent) {
-  var that = this
+  const that = this
 
-  var form = {}
-  var _url
+  let form = {}
+  let _url
 
   if (permanent) {
-
-    _.extend(form, permanent)
+    Object.assign(form, permanent)
 
     if (type === 'newsImg') {
-      _url = API.permanent.addNewsImg
+      _url = API.permanentMaterial.addNewsImg
     } else if (type === 'news') {
-      _url = API.permanent.addNews
+      _url = API.permanentMaterial.addNews
       form = material
     } else {
-      _url = API.permanent.addMaterial
+      _url = API.permanentMaterial.addMaterial
       form.media = fs.createReadStream(material)
     }
   } else {
-    var _url = API.temp.uploadMedia
+    _url = API.tempMaterial.uploadMedia
     form.media = fs.createReadStream(material)
   }
-
-  //console.log(form)
 
   return new Promise(function(resolve, reject) {
     that.fetchAccessToken()
       .then(function(data) {
-        var url = _url + 'access_token=' + data.access_token
-
+        let url = _url + 'access_token=' + data.access_token
         if (!permanent) {
           url += '&type=' + type
         } else {
@@ -268,12 +180,6 @@ Wechat.prototype.uploadMaterial = function(type, material, permanent) {
           }
         }
         console.log(url)
-
-        var options = {
-          method: 'POST',
-          url: url,
-          json: true
-        }
 
         if (type === 'news') {
           options.body = form
@@ -291,13 +197,8 @@ Wechat.prototype.uploadMaterial = function(type, material, permanent) {
               throw new Error('upload material fails')
             }
           })
-          .catch(function(err) {
-            reject(err)
-          })
       })
-
   })
-
 }
 
 Wechat.prototype.getMaterial = function(mediaId, type, permanent) {
@@ -483,7 +384,7 @@ Wechat.prototype.getUserInfo = function(openIds) {
         var options = {
           json: true
         }
-        if (_.isArray(openIds)) {
+        if (Array.isArray(openIds)) {
           url = API.user.batchGet + '&access_token=' + data.access_token
           options.method = 'POST'
           options.body = {
@@ -509,9 +410,7 @@ Wechat.prototype.getUserInfo = function(openIds) {
             reject(err)
           })
       })
-
   })
-
 }
 
 Wechat.prototype.sendMessage = function(message, type, groupId) {
@@ -580,9 +479,7 @@ Wechat.prototype.createMenu = function(menu) {
             reject(err)
           })
       })
-
   })
-
 }
 
 Wechat.prototype.getMenu = function() {
@@ -636,9 +533,7 @@ Wechat.prototype.deleteMenu = function() {
             reject(err)
           })
       })
-
   })
-
 }
 
 module.exports = Wechat

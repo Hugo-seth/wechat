@@ -1,15 +1,13 @@
-'use strict'
-
-var fs = require('fs')
-var Promise = require('bluebird')
+const fs = require('fs')
+const Promise = require('bluebird')
+const crypto = require('crypto')
 
 exports.readFileAsync = function(fpath, encoding) {
   return new Promise(function(resolve, reject) {
-    fs.readFile(fpath, encoding, function(err, content){
+    fs.readFile(fpath, encoding, function(err, content) {
       if (err) {
         reject(err)
       } else {
-        //console.log(content)
         resolve(content)
       }
     })
@@ -17,9 +15,8 @@ exports.readFileAsync = function(fpath, encoding) {
 }
 
 exports.writeFileAsync = function(fpath, content) {
-  //console.log(content)
   return new Promise(function(resolve, reject) {
-    fs.writeFile(fpath, content, function(err){
+    fs.writeFile(fpath, content, function(err) {
       if (err) {
         reject(err)
       } else {
@@ -29,36 +26,32 @@ exports.writeFileAsync = function(fpath, content) {
   })
 }
 
-var crypto = require('crypto')
-
-var createNonce = function() {
+const createNonce = function() {
   return Math.random().toString(36).substr(2, 15)
 }
 
-var createTimestamp = function() {
+const createTimestamp = function() {
   return parseInt(new Date().getTime() / 1000, 10) + ''
 }
 
-var _sign = function(noncestr, ticket, timestamp, url) {
-  var params = [
+const _sign = function(noncestr, ticket, timestamp, url) {
+  let params = [
     'noncestr=' + noncestr,
     'jsapi_ticket=' + ticket,
     'timestamp=' + timestamp,
     'url=' + url
   ]
-
-  var str = params.sort().join('&')
-    //console.log(str)
-  var shasum = crypto.createHash('sha1')
+  let str = params.sort().join('&')
+  let shasum = crypto.createHash('sha1')
   shasum.update(str)
 
   return shasum.digest('hex')
 }
 
-exports.sign = function (ticket, url) {
-  var noncestr = createNonce()
-  var timestamp = createTimestamp()
-  var signature = _sign(noncestr, ticket, timestamp, url)
+exports.sign = function(ticket, url) {
+  let noncestr = createNonce()
+  let timestamp = createTimestamp()
+  let signature = _sign(noncestr, ticket, timestamp, url)
 
   return {
     noncestr: noncestr,

@@ -26,23 +26,9 @@ exports.handlerRequest = function*(next) {
       this.myResponse.content = {
         text: '欢迎关注电影爱好者\n' +
           '回复 1 ~ 5 ，来点好玩的\n' +
-          '回复 电影名称 或 语音 ，搜索电影\n' +
-          '也可以点击 <a href="' + config.wechat.domain + '/movie">语音查电影</a>'
+          '回复 电影名称 或 语音 ，搜索电影'
       }
     } else if (request.Event === 'CLICK') {
-      if (request.EventKey === 'high_fifty_rating') {
-
-      } else if (request.EventKey === 'new_twenty') {
-
-      } else if (request.EventKey === 'action_movies') {
-
-      } else if (request.EventKey === 'science_fiction_movies') {
-
-      } else if (request.EventKey === 'suspense_movies') {
-
-      } else if (request.EventKey === 'help') {
-
-      }
       this.myResponse.content = {
         text: request.Event + request.EventKey
       }
@@ -66,10 +52,15 @@ exports.handlerRequest = function*(next) {
     } else if (request.Content === '3') {
       this.myResponse.responseType = 'image'
 
+      let media = await wechatAPI.uploadMaterial('image', 'images/config.png')
+      console.log(media)
       this.myResponse.content = {
-        img: 'BxY9DCQShdYAJf_qI21taqfFb5ZBH-UVaSG6Yh9AoTk'
+        img: media.media_id
       }
 
+      // this.myResponse.content = {
+      //   img: 'BxY9DCQShdYAJf_qI21taqfFb5ZBH-UVaSG6Yh9AoTk'
+      // }
     } else if (request.Content === '4') {
       this.myResponse.responseType = 'video'
 
@@ -217,10 +208,7 @@ else if (request.Event === 'LOCATION') {
 if (request.Content === '1') {
   this.myResponse.responseType = 'image'
 
-  var media = yield wechatAPI.uploadMaterial('image', 'images/config.png')
-    //console.log(media)
-    //'VE03KZXx2bJ4RlGIez5fhrrq-HrYt2X__T0BIeAPTUa3bsJm7qou-MsNGDmihSHz'
-  this.myResponse.content.img = media.media_id
+  
 
 } else if (request.Content === '2') {
   this.myResponse.responseType = 'video'
