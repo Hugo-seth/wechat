@@ -39,10 +39,6 @@ module.exports = function(opts, handlerRequest) {
         encoding: this.charset
       })
 
-      this.body = 'success'
-
-      //console.log(data.toString())
-
       var content = yield parseXML.parseXMLAsync(data)
 
       //console.log(content)

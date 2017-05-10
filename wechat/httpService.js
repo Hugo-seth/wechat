@@ -1,12 +1,14 @@
 const Promise = require('bluebird')
-const request = require('request')
+const request = require('request-promise')
 
 module.exports = function(method, url, body, formData) {
   let options = {
     method: method,
     url: url,
-    body: body,
     json: true
+  }
+  if (body) {
+    options.body = body
   }
   if (formData) {
     options.formData = formData
@@ -14,9 +16,9 @@ module.exports = function(method, url, body, formData) {
 
   return new Promise(function(resolve, reject) {
     request(options)
-      .then(Response => {
+      .then(response => {
         console.log(response)
-        resolve(response.body)
+        resolve(response)
       })
       .catch(error => {
         console.error(error)

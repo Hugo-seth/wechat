@@ -1,30 +1,28 @@
-'use strict'
+const ejs = require('ejs')
+const heredoc = require('heredoc')
 
-var ejs = require('ejs')
-var heredoc = require('heredoc')
-
-var tpl = heredoc(function() {/*
+const tpl = heredoc(function() {/*
   <xml>
   <ToUserName><![CDATA[<%= toUserName %>]]></ToUserName>
   <FromUserName><![CDATA[<%= fromUserName %>]]></FromUserName>
   <CreateTime><%= createTime %></CreateTime>
   <MsgType><![CDATA[<%= responseType %>]]></MsgType>
   <% if (responseType === 'text') { %>
-    <Content><![CDATA[<%- content.text %>]]></Content>
+  <Content><![CDATA[<%- content.text %>]]></Content>
   <% } else if (responseType === 'image') { %>
-    <Image>
-      <MediaId><![CDATA[<%= content.img %>]]></MediaId>
-    </Image>
+  <Image>
+    <MediaId><![CDATA[<%= content.img %>]]></MediaId>
+  </Image>
   <% } else if (responseType === 'news') { %>
   <ArticleCount><%= content.news.length %></ArticleCount>
   <Articles>
     <% content.news.forEach(function(item) { %>
-      <item>
-        <Title><![CDATA[<%= item.title %>]]></Title> 
-        <Description><![CDATA[<%= item.description %>]]></Description>
-        <PicUrl><![CDATA[<%= item.picurl %>]]></PicUrl>
-        <Url><![CDATA[<%= item.url %>]]></Url>
-      </item>
+    <item>
+      <Title><![CDATA[<%= item.title %>]]></Title> 
+      <Description><![CDATA[<%= item.description %>]]></Description>
+      <PicUrl><![CDATA[<%= item.picurl %>]]></PicUrl>
+      <Url><![CDATA[<%= item.url %>]]></Url>
+    </item>
     <% }) %>
   </Articles>
   <% } else if (responseType === 'video') { %>
@@ -44,7 +42,7 @@ var tpl = heredoc(function() {/*
   </xml>
 */})
 
-var compiled = ejs.compile(tpl)
+const compiled = ejs.compile(tpl)
 
 exports = module.exports = {
   compiled: compiled

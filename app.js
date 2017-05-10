@@ -39,14 +39,18 @@ app.use(views(__dirname + '/app/views', {
   extension: 'pug'
 }))
 
-app.use(bodyParser())
+app.use(bodyParser({
+  onerror: function(err, ctx) {
+    console.error(err)
+  }
+}))
 
 app.use(async(ctx, next) => {
   const start = new Date()
 
   await next()
   const ms = new Date() - start
-  console.log(`${ctx.method} ${decodeURIComponent(ctx.url)} - ${ms}ms`)
+    // console.log(`${ctx.method} ${decodeURIComponent(ctx.url)} - ${ms}ms`)
 })
 
 require('./config/routes')(router)

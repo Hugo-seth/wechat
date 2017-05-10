@@ -1,10 +1,6 @@
-'use strict'
+const config = require('../config/config')
+const Wechat = require('./wechatClass')
 
-var config = require('../config/config')
-var Wechat = require('./wechat')
-
-exports.getWechat = function() {
-  var wechatAPI = new Wechat(config.wechat)
-
-  return wechatAPI
+exports.getWechatInstance = function() {
+  return new Wechat(config.wechat)
 }

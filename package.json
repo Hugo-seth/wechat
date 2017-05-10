@@ -7,7 +7,6 @@
     "start": "./node_modules/.bin/nodemon app"
   },
   "dependencies": {
-    "axios": "^0.16.1",
     "bcrypt": "^1.0.2",
     "bluebird": "^3.5.0",
     "co": "^4.6.0",
@@ -20,10 +19,12 @@
     "koa-router": "^7.1.1",
     "koa-static": "^3.0.0",
     "koa-views": "^6.0.2",
+    "koa-xml-body": "^1.1.0",
     "mongoose": "^4.9.8",
     "pug": "^2.0.0-rc.1",
     "raw-body": "^2.2.0",
     "request": "^2.81.0",
+    "request-promise": "^4.2.1",
     "sha1": "^1.1.1",
     "urlencode": "^1.1.0",
     "xml2js": "^0.4.17"
