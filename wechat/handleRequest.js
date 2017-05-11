@@ -1,157 +1,38 @@
-const path = require('path')
-const menu = require('./menu.js')
-const movie = require('../app/api/movie')
-const wechatInstance = require('./wechatInstance').getWechatInstance()
-
-// wechatInstance.deleteMenu().then(function() {
-//     return wechatInstance.createMenu(menu)
-//   })
-//   .then(function(data) {
-//     console.log(data)
-//   })      
+const Promise = require('bluebird')
+const handleResponse = require('./handleResponse')
 
 module.exports = async function(requestData) {
-  const response = { responseType: 'text' }
+  let response
 
   if (requestData.MsgType === 'event') {
-    if (requestData.Event === 'subscribe') {
-      response.content = {
-        text: '欢迎关注电影爱好者\n' +
-          '回复 1 ~ 5 ，来点好玩的\n' +
-          '回复 电影名称 或 语音 ，搜索电影'
-      }
-    } else if (requestData.Event === 'CLICK') {
-      response.content = {
-        text: requestData.Event + requestData.EventKey
-      }
-    } else {
-      response.content = {
-        text: requestData.Event
-      }
-    }
+    generateText(requestData.Event)
   } else if (requestData.MsgType === 'text') {
-    if (requestData.Content === '1') {
-      response.content = {
-        text: '天下第一就是你'
-      }
-    } else if (requestData.Content === '2') {
-      response.content = {
-        text: '天下最二还是你'
-      }
-    } else if (requestData.Content === '3') {
-      const imageObj = await wechatInstance.uploadMaterial('image', path.join(__dirname, '../images/mayday.jpg'), true)
-
-      response.responseType = 'image'
-      response.content = {
-        img: imageObj.media_id //'BxY9DCQShdYAJf_qI21taieicnZ7J6Z1rH4zvvxlJ2E'
-      }
-    } else if (requestData.Content === '4') {
-      const videoObj = await wechatInstance.uploadMaterial('video', path.join(__dirname, '../images/mayday.mp4'), true, {
-        description: {
-          title: '温柔',
-          introduction: '如果有，就给你自由'
-        }
-      })
-      response.responseType = 'video'
-      response.content = {
-        video: videoObj.media_id, //'BxY9DCQShdYAJf_qI21tamhcufRPTdHymt3nfJn3zp8', 
-        title: '温柔',
-        description: '如果有，就给你自由'
-      }
-    } else if (requestData.Content === '5') {
-      // let addNews = {
-      //   articles: [{
-      //     title: 'Hello Mayday',
-      //     thumb_media_id: 'BxY9DCQShdYAJf_qI21taqfFb5ZBH-UVaSG6Yh9AoTk',
-      //     author: 'hugo',
-      //     digest: 'I will go',
-      //     show_cover_pic: 1,
-      //     content: '谁说不能让我 此生唯一自传 如同诗一般？关于作品9号 [自传]',
-      //     content_source_url: 'http://baike.baidu.com/link?url=KG-XlHbi2lW8lhq71F9ud8Ve_yVoOmoYs62ra1SjTzskg3DeoOnQeObfZvHUPYWDQNt9z57PuiXfwUUOTI_UkbMK2dJQTAOBDrFv5yRVWo3'
-      //   }]
-      // }
-      // const newsObj = await wechatInstance.uploadMaterial('news', addNews)
-      response.responseType = 'news'
-      response.content = { news: [] }
-
-      var getNews = await wechatInstance.getMaterial('BxY9DCQShdYAJf_qI21tavnpwCeA9hvRXFANx4Blry8', true)
-      getNews.news_item.forEach(function(item) {
-        response.content.news.push({
-          title: item.title,
-          description: item.digest,
-          picurl: item.thumb_url,
-          url: item.url
-        })
-      })
-    } else {
-
-      var movies = await movie.searchByName(requestData.Content)
-
-      if (!movies || movies.length === 0) {
-        movies = await movie.searchByDouban(requestData.Content)
-      }
-
-      if (movies && movies.length > 0) {
-        response.responseType = 'news'
-
-        movies = movies.slice(0, 5)
-          //console.log(movies)
-
-        that.myResponse.content = {
-          news: []
-        }
-
-        movies.forEach(function(item) {
-          that.myResponse.content.news.push({
-            title: item.title,
-            description: item.title,
-            picurl: item.poster,
-            url: config.wechat.domain + '/movie/' + item._id
-          })
-        })
-      } else {
-        response.content = {
-          text: '没有查询到与' + requestData.Content + '匹配的电影，你可以换个名字试试'
-        }
-
-      }
+    switch (requestData.Content) {
+      case '1':
+      case '2':
+        response = await handleResponse.generateText(requestData.Content)
+        break
+      case '3':
+        response = await handleResponse.generateImage()
+        break
+      case '4':
+        response = await handleResponse.generateVideo()
+        break
+      case '5':
+        response = await handleResponse.generateCommonNews()
+        break
+      default:
+        response = await handleResponse.generateMovieNews(requestData.Content)
     }
-
   } else if (requestData.MsgType === 'voice') {
-
-    var voiceText = requestData.Recognition
-
-    var movies = await movie.searchByName(voiceText)
-
-    if (!movies || movies.length === 0) {
-      movies = await movie.searchByDouban(voiceText)
-    }
-
-    if (movies && movies.length > 0) {
-      response.responseType = 'news'
-
-      movies = movies.slice(0, 5)
-        //console.log(movies)
-
-      that.myResponse.content = {
-        news: []
-      }
-
-      movies.forEach(function(item) {
-        that.myResponse.content.news.push({
-          title: item.title,
-          description: item.title,
-          picurl: item.images.large,
-          url: config.wechat.domain + '/movie/' + item._id
-        })
-      })
+    const voiceText = requestData.Recognition
+    if (voiceText) {
+      response = await handleResponse.generateMovieNews(voiceText)
     } else {
-      response.content = {
-        text: '没有查询到与' + requestData.Content + '匹配的电影，你可以换个名字试试'
-      }
-
+      response = await handleResponse.generateText('Sorry, 没听清你说的是什么？')
     }
   }
+
   return Promise.resolve(response)
 }
 

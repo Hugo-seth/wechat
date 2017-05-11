@@ -31,7 +31,7 @@ module.exports = async function(ctx, next) {
   const responseData = await handleRequest(requestData)
     // console.log(responseData)
 
-  const xml = await handleResponse(requestData, responseData)
+  const xml = await handleResponse.convertToXML(requestData, responseData)
   console.log(xml)
 
   ctx.status = 200
