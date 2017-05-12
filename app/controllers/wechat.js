@@ -6,9 +6,6 @@ var handleRequest = require('../../wechat/handleRequest')
 var handleResponse = require('../../wechat/handleResponse')
 
 module.exports = async function(ctx, next) {
-  // this.middle = wechat(config.wechat, handler.handlerRequest)
-  // await this.middle(next)
-
   const token = config.wechat.token
   const signature = ctx.query.signature
   const nonce = ctx.query.nonce

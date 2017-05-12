@@ -32,7 +32,7 @@ exports.generateText = async function(content) {
     default:
       response.content.text = content ? content : 'hello world'
   }
-  return Promise.resolve(response)
+  return response
 }
 
 exports.generateImage = async function() {
@@ -43,7 +43,7 @@ exports.generateImage = async function() {
 
   // 直接使用已上传的永久素材
   response.content.img = 'BxY9DCQShdYAJf_qI21tang358xX3jBeNgDtiqpHPXk'
-  return Promise.resolve(response)
+  return response
 }
 
 exports.generateVideo = async function() {
@@ -67,7 +67,7 @@ exports.generateVideo = async function() {
     title: 'Mayday',
     description: 'History of tomorrow'
   }
-  return Promise.resolve(response)
+  return response
 }
 
 exports.generateCommonNews = async function() {
@@ -105,7 +105,7 @@ exports.generateCommonNews = async function() {
       url: item.url
     })
   })
-  return Promise.resolve(response)
+  return response
 }
 
 exports.generateMovieNews = async function(content) {
@@ -125,12 +125,12 @@ exports.generateMovieNews = async function(content) {
         title: item.title,
         description: item.title,
         picurl: item.poster,
-        url: config.wechat.domain + '/movie/' + item._id
+        url: item.doubanUrl
       })
     })
   } else {
     response.responseType = 'text'
-    response.content = { text: '没有查询到与' + content + '匹配的电影，你可以换个名字试试' }
+    response.content = { text: '没有查询到与<<' + content + '>>匹配的电影，你可以换个名字试试' }
   }
-  return Promise.resolve(response)
+  return response
 }

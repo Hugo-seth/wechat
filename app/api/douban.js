@@ -1,5 +1,27 @@
-// const Promise = require('bluebird')
+const Promise = require('bluebird')
+const request = require('request-promise')
 
-// module.exports = function(method, url, params, body) {
+const baseUrl = 'https://api.douban.com/v2/movie'
 
-// }
+module.exports = function(method, url, body) {
+  let options = {
+    method: method,
+    url: baseUrl + url,
+    json: true
+  }
+  if (body) {
+    options.body = body
+  }
+
+  return new Promise(function(resolve, reject) {
+    request(options)
+      .then(response => {
+        // console.log(response)
+        resolve(response)
+      })
+      .catch(error => {
+        console.error(error)
+        reject(error)
+      })
+  })
+}

@@ -13,7 +13,7 @@ module.exports = async function(stream, request) {
   const content = await parseXML(xml)
   const message = formatMessage(content.xml)
 
-  return Promise.resolve(message)
+  return message
 }
 
 async function parseXML(xml) {
