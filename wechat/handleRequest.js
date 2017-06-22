@@ -5,7 +5,7 @@ module.exports = async function(requestData) {
   let response
 
   if (requestData.MsgType === 'event') {
-    generateText(requestData.Event)
+    response = await handleResponse.generateText(requestData.Event)
   } else if (requestData.MsgType === 'text') {
     switch (requestData.Content) {
       case '1':
