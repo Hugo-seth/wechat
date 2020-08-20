@@ -7,7 +7,7 @@
     "start": "./node_modules/.bin/nodemon app"
   },
   "dependencies": {
-    "bcrypt": "^1.0.2",
+    "bcrypt": "^5.0.0",
     "bluebird": "^3.5.0",
     "co": "^4.6.0",
     "crypto": "0.0.3",
